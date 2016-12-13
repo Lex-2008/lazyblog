@@ -1,0 +1,177 @@
+// different ways of obtaining data from HTML webpage,
+// with times (in ms) it took on a page with 99 posts.
+// load_prebuilt_data is the pastest and is being used.
+
+function load_prebuilt_data(){ //7,8,11,14
+	var objs=id('content').children;
+	for(var i=0; i<objs.length; i++){
+		var text=objs[i].lastElementChild.innerHTML.toLowerCase().split('\n');
+		posts[i]={
+				'title':text[1],
+				'created':text[2],
+				'modified':text[3],
+				'tags':text[4].split(' '),
+				'intro':text[5],
+				obj:objs[i],
+		};
+	}
+}
+
+function load_big_string_methods(){ //37,18,25,21
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	var text=id('content').innerHTML;
+	var last=0;
+	for(var i=0; i<objs.length; i++){
+		var title=text.indexOf('class="title"', last);
+		var created=text.indexOf('class="created"', last);
+		var modified=text.indexOf('class="modified"', last);
+		var tags=text.indexOf('class="tags"', last);
+		var intro=text.indexOf('class="intro"', last);
+		posts[i]={
+				'title':text.slice(title+14,text.indexOf('</a>',title)),
+				'created':text.slice(created+16,text.indexOf('</span>',created)),
+				'modified':text.slice(modified+18,text.indexOf('</span>',modified)),
+				'tags':text.slice(tags+13,text.indexOf('</span>',tags)).toLowerCase().split(' '),
+				'intro':text.slice(intro+14,text.indexOf('</p>',intro)),
+				obj:objs[i],
+		};
+		last=intro+14;
+	};
+}
+
+function load_small_string_methods(){ //34,17,29,23
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	for(var i=0; i<objs.length; i++){
+		var text=objs[i].innerHTML;
+		var title=text.indexOf('class="title"');
+		var created=text.indexOf('class="created"');
+		var modified=text.indexOf('class="modified"');
+		var tags=text.indexOf('class="tags"');
+		var intro=text.indexOf('class="intro"');
+		posts[i]={
+				'title':text.slice(title+14,text.indexOf('</a>',title)),
+				'created':text.slice(created+16,text.indexOf('</span>',created)),
+				'modified':text.slice(modified+18,text.indexOf('</span>',modified)),
+				'tags':text.slice(tags+13,text.indexOf('</span>',tags)).toLowerCase().split(' '),
+				'intro':text.slice(intro+14,text.indexOf('</p>',intro)),
+				obj:objs[i],
+		};
+	};
+}
+
+function load_big_regexp(){ //21,18,23,19
+	function matchAll(j){
+		return id('content').innerHTML.match(/class="(title|created|modified|tags|intro)">.*/g);
+	}
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	var matches=matchAll();
+	var j=0;
+	for(var i=0; i<matches.length; i++){
+		switch(matches[i].substr(7,4)){
+			case 'titl':
+				//first item
+				posts[j]={
+					obj:objs[j],
+					'title':matches[i].slice(14,-9)};
+			break;
+			case 'crea':
+				posts[j].created=matches[i].slice(16,-7);
+			break;
+			case 'modi':
+				posts[j].modified=matches[i].slice(17,-7);
+			break;
+			case 'tags':
+				posts[j].tags=matches[i].slice(13,-7).toLowerCase().split(' ');
+			break;
+			case 'intr':
+				posts[j].intro=matches[i].slice(14,-4);
+				//last item
+				j++;
+			break;
+		}
+	}
+}
+
+function load_small_regexps(){ //24,33,32,35
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	for(var i=0; i<objs.length; i++){
+		var text=objs[i].innerHTML;
+		posts[i]={
+			'title':text.match(/class="title">(.*)</)[1],
+			'created':text.match(/class="created">(.*)</)[1],
+			'intro':text.match(/class="intro">(.*)</)[1],
+			'modified':text.match(/class="modified">(.*)</)[1],
+			'tags':text.match(/class="tags">(.*)</)[1].toLowerCase().split(' '),
+			obj:objs[i],
+		};
+	};
+}
+
+function load_flat_elements(){ //58,74,96,56
+	list=[];
+	function flat(e){
+		list.push(e);
+		for(var i=0;i<e.children.length;i++){
+			flat(e.children[i]);
+		}
+	}
+	function getIt(j){
+		return list[j].innerHTML.toLowerCase();
+	}
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	for(var i=0; i<objs.length; i++){
+		list=[];
+		flat(objs[i]);
+		var post={
+			'obj':objs[i],
+		};
+		for(var j=0; j<list.length; j++){
+			switch(list[j].className){
+				case 'title':
+				case 'intro':
+				case 'created':
+				case 'modified':
+					post[list[j].className]=getIt(j);
+				break;
+				case 'tags':
+					post[list[j].className]=getIt(j).split(' ');
+				break;
+			}
+		}
+		posts[i]=post;
+	};
+}
+
+function load_query_selectors(){//40,25,38,30,53
+	tags=[];
+	tags_count={};
+	var objs=id('content').children;
+	posts=new Array(objs.length);
+	for(var i=0; i<objs.length; i++){
+		var post=objs[i];
+		posts[i]={
+			'title':post.querySelector('.title').innerText.toLowerCase(),
+			'created':post.querySelector('.created').innerText.toLowerCase(),
+			'intro':post.querySelector('.intro').innerText.toLowerCase(),
+			'modified':post.querySelector('.modified').innerText.toLowerCase(),
+			'tags':post.querySelector('.tags').innerText.toLowerCase().split(' '),
+			obj:post,
+		};
+		//*/
+	};
+}

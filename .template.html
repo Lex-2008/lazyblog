@@ -1,0 +1,55 @@
+<!doctype html><html><head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<title>$title</title>
+</head><body>
+<div id="wrap">
+	<div id="header">
+		<h1><a href=".">Notes</a></h1>
+		<p>Notes about different stuff</p>
+	</div>
+	<!-- begin index only -->
+	<style></style>
+	<script>document.getElementsByTagName('style')[0].innerHTML='body{display:none}'</script>
+	<div id="controls">
+		<table>
+			<tr><th>Sort&nbsp;by:</th><td><a href="#sort:title">Title</a> <a href="#sort:created">Created</a> <a href="#sort:modified">Modified</a></td></tr>
+			<tr><th>Tags:</th><td id="tags"></td></tr>
+			<tr><th>Search:</th><td><input type="search" id="search" placeholder="Type to search" autofocus></td></tr>
+		</table>
+	</div>
+	<!-- end index only -->
+	<div id="content">
+		<!-- put contents below -->
+		<!-- begin $name -->
+		<div class="post">
+			<h2><a href="$name.html">$title</a></h2>
+			<p class="trivia">
+				Created: $created &mdash; modified: $modified &mdash; tags: $tags
+			</p>
+			<p class="intro">$intro</p>
+			$content
+			<!-- begin index only -->
+			<div class="data"> <!-- same data to be accessible by scripts
+$title
+$created
+$modified
+$tags
+$intro
+			--> </div>
+			<!-- end index only -->
+		</div>
+		<!-- end $name -->
+	</div>
+	<!-- begin index only -->
+	<script src="script.js"></script>
+	<script>document.getElementsByTagName('style')[0].innerHTML=''</script>
+	<!-- end index only -->
+	<div id="footer">
+		<a href="http://creativecommons.org/licenses/by/4.0/" title="Creative Commons Attribution">CC BY</a>
+		<a href="/">Alexey Shpakovsky</a> &mdash; <a id="email"
+			href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">
+			(click to see e-mail)</a>
+	</div>
+</div>
+</body></html>

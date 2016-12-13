@@ -1,114 +1,95 @@
 #!/bin/bash
 
-TEMPLATE=".template.html"
-INDEX_PART_TEMPLATE=".index.part.html"
-INDEX_FULL_TEMPLATE=".index.full.html"
+TEXT_TEMPLATE=".template.md"
+HTML_TEMPLATE=".template.html"
 DATE_FORMAT="%F"
-TEMPLATE_LIST='$title $author $created $modified $intro $content'
-SEP=" -- "
-SORT_TEMPLATE='$created'
+BLOG_TITLE="Notes"
+READ_MORE="Read more..."
+TEMPLATE_LIST='$name $title $created $modified $tags $intro $content'
+TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
+
+. .config &> /dev/null
 
 set +o histexpand
 
+function die() {
+	echo "$2" >&2
+	exit "$1"
+}
+
 function process_file() {
 	src="$1"
-	name="${src%.*}"
+	update_modified="$2"
+	export name="${src%.*}"
 	dst="$name.html"
-	if [ ! -s "$src" ]; then
-		echo "ERROR! file [$src] must exist for rebuild_file"
-		exit 1
-	fi
+	echo "processing file [$name]..."
+	[ -s "$src" ] || die 11 "ERROR! file [$src] must exist for rebuild_file"
+	[ "$src" = "$dst" ] && die 12 "ERROR! file [$src] must NOT end with .html"
+	[ -s "$HTML_TEMPLATE" ] || die 13 "ERROR! file [$HTML_TEMPLATE] must exist for rebuild_file"
 	{
-		# read header an set variables
+		#echo "reading header..."
 		while read line; do
 			[ "$line" = "" ] && break
-			key="${line%=*}"
-			value="${line/*=}"
-			[ "$value" = "NOW" ] && value = "$(date +"$DATE_FORMAT")"
-			eval export $key="\"$value\""
+			key="${line%%=*}"
+			value="${line#*=}"
+			eval export "$key"="\$value"
 		done
-		# rest of $src file gets passed through markdown
-		content="$(Markdown.pl)"
+		#echo "Markdown..."
+		export content="$(Markdown.pl)"
 	} <"$src"
-	envsubst "$TEMPLATE_LIST" <"$TEMPLATE" >"$dst"
-}
-
-function update_index() {
-	[ -f index.html ] || cp "$INDEX_FULL_TEMPLATE" index.html
-	index_part="$(envsubst "$TEMPLATE_LIST" <"$INDEX_PART_TEMPLATE")"
-	sort="$(envsubst "$TEMPLATE_LIST" <<<"$SORT_TEMPLATE")"
-	delete "$name" <index.html  | insert "$name" "$sort" "$index_part" >index.new.html
-	mv index.new.html index.html
-}
-
-#separators look like this:
-#<!-- begin $name $sep $sort -->
-#<!-- end $name -->
-
-function delete() {
-	name="$1"
-	print=1
-	while read line; do
-		expr "$line" : "<!-- begin $name $SEP" >/dev/null && print=0
-		[ "$print" = 1 ] && echo "$line"
-		[ "$line" = "<!-- end $name -->" ] && cat # process rest of file
-	done
-}
-
-function insert() {
-	name="$1"
-	sort="$2"
-	content="$3"
-	print=0
-	while read line; do
-		#if this_sort="$(expr "$line" : "<!-- begin .* $SEP \(.*\) -->")"; then
-			#if expr "$this_mark" >= "$my_mark"; then
-		this_sort="$(expr "$line" : "<!-- begin .* $SEP \(.*\) -->")" && expr "$this_sort" \<= "$sort" >/dev/null && print=1
-		[ "$line" = "<!-- contents above -->" ] && print=1
-		if [ "$print" = "1" ]; then
-			echo "<!-- begin $name $SEP $sort -->"
-			echo "$content"
-			echo "<!-- end $name -->"
-			echo "$line"
-			cat
-			break
-		fi
-		echo "$line"
-	done
+	if [ "$modified_now" = "1" -a "$update_modified" = "1" ]; then
+		#echo "updating timestamp..."
+		modified="$(date +"$DATE_FORMAT")"
+		sed -i "1,/^$/s/^modified=.*/modified=$modified/" "$src"
+	fi
+	#echo "writing to [$dst]..."
+	sed '/<!-- begin index only -->/,/<!-- end index only -->/d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST" >"$dst"
+	#echo "patching index.html..."
+	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$HTML_TEMPLATE" | title=$BLOG_TITLE envsubst '$title' >index.html
+	content="<p class=\"readmore\"><a href=\"$name.html\">$READ_MORE</a></p>"
+	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
+	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
 }
 
 case "$1" in
-	( "add" | "file" | "update" )
+	( "add" )
 		process_file "$2"
-		update_index
+		;;
+	( "update" )
+		process_file "$2" 1
 		;;
 	( "rm" )
 		name="${2%.*}"
-		delete "$name" <index.html  >index.new.html
-		mv index.new.html index.html
-		;;
-	( "update1" )
-		process_file "$2"
+		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
+		rm -r "$name.*"
 		;;
 	( "post" )
-		echo "not implemented yet" >&2
+		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for rebuild_file"
+		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
+		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
+		$EDITOR ".new-post.md"
+		title="$(sed '/^title=/!d;s/^title=//' .new-post.md)"
+		[ -z "$title" ] && die 26 "ERROR! \$title not set!"
+		new_filename="$(echo $title | eval "$TITLE_TO_FILENAME").md"
+		[ -z "$new_filename" ] && die 28 "ERROR! \$title does not contain valid characters!" #TODO: call it blog-post, maybe
+		[ -f "$new_filename.html" ] && die 29 "ERROR! file [$new_filename.html] already exist!" #TODO: add numbers
+		mv .new-post.md "$new_filename"
+		process_file "$new_filename" 1
 		;;
 	( "edit" )
-		echo "not implemented yet" >&2
+		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
+		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
+		$EDITOR "$2"
+		process_file "$2" 1
 		;;
 	( "rebuild" )
+		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
 		rm index.html
 		shift
-		for f in "$@"; do
-			( # to protect variables exported from one file to influencing other files,
-			  # we process each file in a subshell
-				process_file "$f"
-				update_index
-			)
-		done
+		for f in $(ls -tr "$@"); do ( process_file "$f" ) done
 		;;
 	( "import" )
-		# used when importing to other scripts
+		# used when importing to other scripts - does nothing
 		;;
 	( "*" )
 		echo "some help text"
