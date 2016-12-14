@@ -64,9 +64,10 @@ case "$1" in
 		rm -r "$name.*"
 		;;
 	( "post" )
-		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for rebuild_file"
+		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
+		[ -s "$2" ] && cat "$2" >>.new-post.md
 		$EDITOR ".new-post.md"
 		title="$(sed '/^title=/!d;s/^title=//' .new-post.md)"
 		[ -z "$title" ] && die 26 "ERROR! \$title not set!"
