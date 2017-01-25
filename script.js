@@ -55,10 +55,6 @@ function init(){
 		//if(params.length!=2) return;
 		$('#controls input[type="search"]').value='';
 		switch(params[0]){
-			case '#sort':
-				var sort_orders={'title':1,'created':-1,'modified':-1};
-				show_sorted(params[1],sort_orders[params[1]]);
-			break;
 			case '#tag':
 				show_tag(params[1]);
 			break;
