@@ -1,4 +1,4 @@
-#!/bin/bash
+/bin/bash
 
 TEXT_TEMPLATE=".template.md"
 HTML_TEMPLATE=".template.html"
@@ -19,8 +19,8 @@ function die() {
 
 function process_file() {
 	src="$1"
-	update_modified="$2"
 	export name="${src%.*}"
+	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	dst="$name.html"
 	echo "processing file [$name]..."
 	[ -s "$src" ] || die 11 "ERROR! file [$src] must exist for rebuild_file"
@@ -37,11 +37,6 @@ function process_file() {
 		#echo "Markdown..."
 		export content="$(Markdown.pl)"
 	} <"$src"
-	if [ "$modified_now" = "1" -a "$update_modified" = "1" ]; then
-		#echo "updating timestamp..."
-		modified="$(date +"$DATE_FORMAT")"
-		sed -i "1,/^$/s/^modified=.*/modified=$modified/" "$src"
-	fi
 	#echo "writing to [$dst]..."
 	sed '/<!-- begin index only -->/,/<!-- end index only -->/d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST" >"$dst"
 	#echo "patching index.html..."
@@ -52,11 +47,8 @@ function process_file() {
 }
 
 case "$1" in
-	( "add" )
+	( "add" | "update" | "file" )
 		process_file "$2"
-		;;
-	( "update" )
-		process_file "$2" 1
 		;;
 	( "rm" )
 		name="${2%.*}"
@@ -75,13 +67,13 @@ case "$1" in
 		[ -z "$new_filename" ] && die 28 "ERROR! \$title does not contain valid characters!" #TODO: call it blog-post, maybe
 		[ -f "$new_filename.html" ] && die 29 "ERROR! file [$new_filename.html] already exist!" #TODO: add numbers
 		mv .new-post.md "$new_filename"
-		process_file "$new_filename" 1
+		process_file "$new_filename"
 		;;
 	( "edit" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		$EDITOR "$2"
-		process_file "$2" 1
+		process_file "$2"
 		;;
 	( "rebuild" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
