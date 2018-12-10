@@ -43,7 +43,6 @@ function init(){
 	addTags();
 	$('#controls input[type="search"]').oninput=function(){
 		if(this.value) {
-			search(this.value);
 			location.hash='#search:'+this.value;
 		} else {
 			show_sorted('created',-1);
@@ -51,7 +50,7 @@ function init(){
 		}
 	}
 	window.onhashchange=function(){
-		var params=location.hash.split(':');
+		var params=decodeURIComponent(location.hash).split(':');
 		//if(params.length!=2) return;
 		$('#controls input[type="search"]').value='';
 		switch(params[0]){
