@@ -71,11 +71,11 @@ case "$1" in
 		$EDITOR ".new-post.md"
 		title="$(sed '/^title=/!d;s/^title=//' .new-post.md)"
 		[ -z "$title" ] && die 26 "ERROR! \$title not set!"
-		new_filename="$(echo $title | eval "$TITLE_TO_FILENAME").md"
+		new_filename="$(echo $title | eval "$TITLE_TO_FILENAME")"
 		[ -z "$new_filename" ] && die 28 "ERROR! \$title does not contain valid characters!" #TODO: call it blog-post, maybe
 		[ -f "$new_filename.html" ] && die 29 "ERROR! file [$new_filename.html] already exist!" #TODO: add numbers
-		mv .new-post.md "$new_filename"
-		process_file "$new_filename"
+		mv .new-post.md "$new_filename.md"
+		process_file "$new_filename.md"
 		;;
 	( "edit" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
