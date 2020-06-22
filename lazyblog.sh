@@ -50,12 +50,20 @@ case "$1" in
 	( "add" | "update" | "file" )
 		process_file "$2"
 		;;
-	( "rm" )
+	( "rm" | "rmrf" )
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
-		rm -r "$name.*"
+    rm "$name.html"
+		test "$1" == "rmrf" && rm -rf $name.*
 		;;
-	( "post" )
+  ( "mv" )
+    name="${2%.*}"
+    sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
+    rm "$name.html"
+    mv "$2" "$3"
+		process_file "$3"
+		;;
+  ( "post" )
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
