@@ -1,4 +1,4 @@
-/bin/bash
+#!/bin/bash
 
 TEXT_TEMPLATE=".template.md"
 HTML_TEMPLATE=".template.html"
