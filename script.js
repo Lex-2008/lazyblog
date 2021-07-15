@@ -86,7 +86,7 @@ function display(posts, max){
 	par.innerHTML='';
 	if(max) {
 		if(max<posts.length)
-			setTimeout(function(){display(posts)},200)
+			setTimeout(function(){display(posts)},1100)
 		max=Math.min(max, posts.length);
 	} else
 		max=posts.length;
@@ -129,4 +129,4 @@ function show_tag(text, posts=window.posts){
 }
 
 init();
-setTimeout(init2,300);
+setTimeout(init2,1100);
