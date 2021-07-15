@@ -4,8 +4,10 @@ TEXT_TEMPLATE=".template.md"
 HTML_TEMPLATE=".template.html"
 DATE_FORMAT="%F"
 BLOG_TITLE="Notes"
+BLOG_INTRO="Notes about different stuff"
+BLOG_URL="http://alexey.shpakovsky.ru/en"
 READ_MORE="Read more..."
-TEMPLATE_LIST='$name $title $created $modified $tags $intro $content'
+TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $intro $content'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 
 . .config &> /dev/null
@@ -40,7 +42,7 @@ function process_file() {
 	#echo "writing to [$dst]..."
 	sed '/<!-- begin index only -->/,/<!-- end index only -->/d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST" >"$dst"
 	#echo "patching index.html..."
-	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$HTML_TEMPLATE" | title=$BLOG_TITLE envsubst '$title' >index.html
+	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$HTML_TEMPLATE" | name="index" title="$BLOG_TITLE" intro="$BLOG_INTRO" envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $title $intro' >index.html
 	content="<p class=\"readmore\"><a href=\"$name.html\">$READ_MORE</a></p>"
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
 	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
@@ -53,17 +55,17 @@ case "$1" in
 	( "rm" | "rmrf" )
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
-    rm "$name.html"
-		test "$1" == "rmrf" && rm -rf $name.*
+		rm "$name.html"
+		test "$1" == "rmrf" && rm -rf $name.* $name/
 		;;
-  ( "mv" )
-    name="${2%.*}"
-    sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
-    rm "$name.html"
-    mv "$2" "$3"
+	( "mv" )
+		name="${2%.*}"
+		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
+		rm "$name.html"
+		mv "$2" "$3"
 		process_file "$3"
 		;;
-  ( "post" )
+	( "post" )
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
