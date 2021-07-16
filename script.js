@@ -4,21 +4,34 @@ function $(q){return document.querySelector(q)}
 var posts=[];
 var tags=[];
 var tags_count={};
+var search_loaded=false;
 
 function load(){
 	var objs=id('content').children;
 	for(var i=0; i<objs.length; i++){
 		var text=objs[i].lastElementChild.innerHTML.toLowerCase().split('\n');
 		posts[i]={
-				'title':text[1],
-				'created':text[2],
-				'modified':text[3],
-				'tags':text[4].split(' '),
-				'intro':text[5],
+				'created':text[1],
+				'tags':text[2].split(' '),
 				obj:objs[i],
 		};
 	}
 }
+
+function load_search(){
+	posts.forEach(function(post){
+		var matches=post.obj.innerHTML.match(/class="(title|intro)">.*/g);
+		for(var i=0; i<matches.length; i++){
+			if(matches[i][7]=='t'){
+				post.title=matches[i].slice(14,-9);
+			} else {
+				post.intro=matches[i].slice(14,-4);
+			}
+		}
+	});
+	search_loaded=true;
+}
+
 
 function addTags(){
 	var ui='';
@@ -104,6 +117,7 @@ function show_sorted(param, sort_order=1, posts=window.posts, max=0){
 }
 
 function search(text, posts=window.posts){
+	if(!search_loaded){load_search()};
 	text=text.toLowerCase();
 	show_sorted('rel',1,
 		posts.map(function(post){
