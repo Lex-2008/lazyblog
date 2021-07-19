@@ -23,9 +23,9 @@ function load_search(){
 		var matches=post.obj.innerHTML.match(/class="(title|intro)">.*/g);
 		for(var i=0; i<matches.length; i++){
 			if(matches[i][7]=='t'){
-				post.title=matches[i].slice(14,-9);
+				post.title=matches[i].slice(14,-9).toLowerCase();
 			} else {
-				post.intro=matches[i].slice(14,-4);
+				post.intro=matches[i].slice(14,-4).toLowerCase();
 			}
 		}
 	});
@@ -54,7 +54,7 @@ function init(){
 	});
 	tags=Object.keys(tags_count).sort();
 	addTags();
-	$('#controls input[type="search"]').oninput=function(){
+	id('search').oninput=function(){
 		if(this.value) {
 			location.hash='#search:'+this.value;
 		} else {
@@ -65,13 +65,13 @@ function init(){
 	window.onhashchange=function(){
 		var params=decodeURIComponent(location.hash).split(':');
 		//if(params.length!=2) return;
-		$('#controls input[type="search"]').value='';
+		id('search').value='';
 		switch(params[0]){
 			case '#tag':
 				show_tag(params[1]);
 			break;
 			case '#search':
-				$('#controls input[type="search"]').value=params[1];
+				id('search').value=params[1];
 				search(params[1]);
 			break;
 			default:

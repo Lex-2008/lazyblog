@@ -8,12 +8,12 @@
 </head><body>
 <div id="wrap">
 	<div id="header">
-		<h1><a href="$BLOG_URL">$BLOG_TITLE</a></h1>
+		<h1><a href="$BLOG_URL/">$BLOG_TITLE</a></h1>
 		<p>$BLOG_INTRO</p>
 	</div>
 	<!-- begin index only -->
-	<style></style>
-	<script>document.getElementsByTagName('style')[0].innerHTML='body{display:none}'</script>
+	<style id="hideall">#controls{display:none}</style>
+	<script>document.getElementById('hideall').innerHTML='body{display:none}'</script>
 	<div id="controls">
 		<table>
 			<tr><th>Tags:</th><td id="tags"></td></tr>
@@ -32,7 +32,7 @@
 			<p class="intro">$intro</p>
 			$content
 			<!-- begin index only -->
-			<div class="data"> <!-- same data to be accessible by scripts
+			<div> <!-- for scripts
 $created
 $tags
 			--> </div>
@@ -42,7 +42,7 @@ $tags
 	</div>
 	<!-- begin index only -->
 	<script src="script.js"></script>
-	<script>document.getElementsByTagName('style')[0].innerHTML=''</script>
+	<script>document.getElementById('hideall').innerHTML=''</script>
 	<!-- end index only -->
 	<div id="footer">
 		<a href="http://creativecommons.org/licenses/by/4.0/" title="Creative Commons Attribution">CC BY</a>
