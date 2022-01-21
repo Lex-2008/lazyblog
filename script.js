@@ -89,7 +89,11 @@ function init2(){
 				return false;
 			}
 		};
-		post.obj.querySelector('.readmore > a').tabIndex=-1;
+		var as=post.obj.getElementsByTagName('a');
+		for(var i=0; i<as.length; i++){
+			if(as[i].parentNode.tagName != 'H2')
+				as[i].tabIndex=-1;
+		};
 	});
 }
 
