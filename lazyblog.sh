@@ -8,7 +8,7 @@ BLOG_TITLE="Notes"
 BLOG_INTRO="Notes about different stuff"
 BLOG_URL="http://alexey.shpakovsky.ru/en"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $htmltags $intro $content'
+TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $htmltags $intro'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 
 . .config &> /dev/null
@@ -32,19 +32,19 @@ function process_file() {
 	[ "$src" = "$dst" ] && die 12 "ERROR! src file [$src] must NOT end with .html"
 	[ -s "$POST_TEMPLATE" ] || die 13 "ERROR! post template file [$POST_TEMPLATE] must exist for process_file"
 	{
-		#echo "reading header..."
+		#echo "reading header..." >&2
 		while read line; do
 			[ "$line" = "" ] && break
 			key="${line%%=*}"
 			value="${line#*=}"
 			eval export "$key"="\$value"
 		done
-		#echo "Markdown..."
-		export content="$(Markdown.pl)"
-	} <"$src"
-	#echo "writing to [$dst]..."
-	export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_<a href="./#tag:&">&</a>_g')"
-	<"$POST_TEMPLATE" envsubst "$TEMPLATE_LIST" >"$dst"
+		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_<a href="./#tag:&">&</a>_g')"
+		sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+		#echo "Markdown..." >&2
+		Markdown.pl
+		sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+	} <"$src" >"$dst"
 	test "$GZIP_HTML" = y && gzip -fk "$dst"
 	#echo "patching index.html..."
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
