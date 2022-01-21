@@ -97,17 +97,20 @@ function init2(){
 	});
 }
 
-function display(posts, max){
+function display(posts, max, skip){
 	var par=tag('main');
 	var docFrag = document.createDocumentFragment();
-	par.innerHTML='';
+	if(!skip) {
+		par.innerHTML='';
+		skip=0;
+	}
 	if(max) {
 		if(max<posts.length)
-			setTimeout(function(){display(posts)},1100)
+			setTimeout(function(){display(posts, 0, max)},1100)
 		max=Math.min(max, posts.length);
 	} else
 		max=posts.length;
-	for(var i=0; i<max; i++)
+	for(var i=skip; i<max; i++)
 		docFrag.appendChild(posts[i].obj);
 	par.appendChild(docFrag);
 };
