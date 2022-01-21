@@ -1,14 +1,14 @@
 #!/bin/bash
 
 TEXT_TEMPLATE=".template.md"
-HTML_TEMPLATE=".template.html"
+POST_TEMPLATE=".post-template.html"
+INDEX_TEMPLATE=".index-template.html"
 DATE_FORMAT="%F"
 BLOG_TITLE="Notes"
 BLOG_INTRO="Notes about different stuff"
 BLOG_URL="http://alexey.shpakovsky.ru/en"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-READ_MORE="Read more..."
-TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $intro $content'
+TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $htmltags $intro $content'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 
 . .config &> /dev/null
@@ -30,7 +30,7 @@ function process_file() {
 	echo "processing file [$name]..."
 	[ -s "$src" ] || die 11 "ERROR! file [$src] must exist for rebuild_file"
 	[ "$src" = "$dst" ] && die 12 "ERROR! file [$src] must NOT end with .html"
-	[ -s "$HTML_TEMPLATE" ] || die 13 "ERROR! file [$HTML_TEMPLATE] must exist for rebuild_file"
+	[ -s "$POST_TEMPLATE" ] || die 13 "ERROR! file [$POST_TEMPLATE] must exist for rebuild_file"
 	{
 		#echo "reading header..."
 		while read line; do
@@ -43,12 +43,12 @@ function process_file() {
 		export content="$(Markdown.pl)"
 	} <"$src"
 	#echo "writing to [$dst]..."
-	sed '/<!-- begin index only -->/,/<!-- end index only -->/d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST" >"$dst"
+	export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_<a href="./#tag:&">&</a>_g')"
+	<"$POST_TEMPLATE" envsubst "$TEMPLATE_LIST" >"$dst"
 	test "$GZIP_HTML" = y && gzip -fk "$dst"
 	#echo "patching index.html..."
-	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$HTML_TEMPLATE" | name="index" title="$BLOG_TITLE" intro="$BLOG_INTRO" envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $title $intro' >index.html
-	content="<p class=\"readmore\"><a href=\"$name.html\">$READ_MORE</a></p>"
-	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$HTML_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
+	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
+	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
 	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
 	test "$GZIP_HTML" = y && gzip -fk index.html
 }

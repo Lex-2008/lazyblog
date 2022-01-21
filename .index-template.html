@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<title>$BLOG_TITLE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="$BLOG_INTRO">
+<link rel="canonical" href="$BLOG_URL/">
+<style>
+body {
+	margin: auto;
+	width: 80ex;
+	text-align: justify;
+	hyphens: auto;
+}
+footer {text-align: center}
+header a, footer a, small a {color: linktext !important}
+</style>
+</head><body>
+<style id="hideall"></style>
+<script>document.getElementById('hideall').innerHTML='body{display:none}'</script>
+<header>
+	<h1><a href="$BLOG_URL/">$BLOG_TITLE</a></h1>
+	<p>$BLOG_INTRO</p>
+	<hr>
+	<!--
+	<table>
+		<tr><th>Tags:</th><td id="tags"></td></tr>
+		<tr><th><label for="search">Search:</label></th><td><input type="search" id="search" placeholder="Type to search"></td></tr>
+	</table>
+	-->
+</header>
+<main>
+	<!-- put contents below -->
+	<!-- begin $name -->
+	<article>
+		<h2><a href="$name.html" class="title">$title</a></h2>
+		<small>
+			Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
+			tags: $htmltags
+		</small>
+		<p class="intro">$intro</p>
+		<p><a href="$name.html">Read more...</a></p>
+		<div> <!-- for scripts
+$created
+$tags
+		--> </div>
+	</article>
+	<!-- end $name -->
+</main>
+<script>
+	document.getElementsByTagName('header')[0].innerHTML=
+	document.getElementsByTagName('header')[0].innerHTML.replace(/<!--|-->/g,'');
+</script>
+<script src="script.js"></script>
+<script>
+	document.getElementById('hideall').innerHTML='';
+	document.getElementById('search').focus();
+</script>
+<footer>
+	<hr>
+	<a href="http://creativecommons.org/licenses/by/4.0/" title="Creative Commons Attribution">CC BY</a>
+	<a href="http://alexey.shpakovsky.ru/">Alexey Shpakovsky</a> &mdash;
+	<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">show e-mail</a>
+</footer>
+</body></html>

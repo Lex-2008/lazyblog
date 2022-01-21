@@ -1,5 +1,7 @@
+function tag(q){return document.getElementsByTagName(q)[0]}
 function id(q){return document.getElementById(q)}
 function $(q){return document.querySelector(q)}
+function $$(q){return document.querySelectorAll(q)}
 
 var posts=[];
 var tags=[];
@@ -7,7 +9,7 @@ var tags_count={};
 var search_loaded=false;
 
 function load(){
-	var objs=id('content').children;
+	var objs=$$('article');
 	for(var i=0; i<objs.length; i++){
 		var text=objs[i].lastElementChild.innerHTML.toLowerCase().split('\n');
 		posts[i]={
@@ -94,7 +96,7 @@ function init2(){
 }
 
 function display(posts, max){
-	var par=id('content');
+	var par=tag('main');
 	var docFrag = document.createDocumentFragment();
 	par.innerHTML='';
 	if(max) {

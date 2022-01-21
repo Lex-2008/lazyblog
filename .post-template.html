@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<title>$title</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="$intro">
+<link rel="canonical" href="$BLOG_URL/$name.html">
+<style>
+body {
+	margin: auto;
+	width: 80ex;
+	text-align: justify;
+	hyphens: auto;
+}
+footer {text-align: center}
+header a, footer a, small a {color: linktext !important}
+/* not all of these are always used */
+img{max-width: 100%}
+blockquote{border-left:solid 3px gray}
+/* cache links */
+a[href^="/cache/"], a[href^="http://archive."]
+{font-size: x-small;vertical-align: sub;}
+</style>
+</head><body>
+<header>
+	<h1><a href="$name.html">$title</a></h1>
+	<small>
+		Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
+		tags: $htmltags
+	</small>
+	<hr>
+</header>
+<main>
+	<p class="intro">$intro</p>
+	=====
+</main>
+<footer>
+	<hr>
+	<a href="http://creativecommons.org/licenses/by/4.0/" title="Creative Commons Attribution">CC BY</a>
+	<a href="http://alexey.shpakovsky.ru/">Alexey Shpakovsky</a> &mdash;
+	<a href="./">show all articles</a> &mdash;
+	<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">show e-mail</a>
+</footer>
+</body></html>
