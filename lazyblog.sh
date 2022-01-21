@@ -28,9 +28,9 @@ function process_file() {
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	dst="$name.html"
 	echo "processing file [$name]..."
-	[ -s "$src" ] || die 11 "ERROR! file [$src] must exist for rebuild_file"
-	[ "$src" = "$dst" ] && die 12 "ERROR! file [$src] must NOT end with .html"
-	[ -s "$POST_TEMPLATE" ] || die 13 "ERROR! file [$POST_TEMPLATE] must exist for rebuild_file"
+	[ -s "$src" ] || die 11 "ERROR! src file [$src] must exist for process_file"
+	[ "$src" = "$dst" ] && die 12 "ERROR! src file [$src] must NOT end with .html"
+	[ -s "$POST_TEMPLATE" ] || die 13 "ERROR! post template file [$POST_TEMPLATE] must exist for process_file"
 	{
 		#echo "reading header..."
 		while read line; do
