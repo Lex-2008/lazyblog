@@ -36,11 +36,9 @@ function load_search(){
 
 
 function addTags(){
-	var ui='';
-	tags.forEach(function(tag){
-		ui+='<a href="#tag:'+tag+'" data-count="'+tags_count[tag]+'">'+tag+'</a> ';
-	});
-	id('tags').innerHTML=ui;
+	id('tags').innerHTML=tags.map(function(tag){
+		return '<a href="#tag:'+tag+'">'+tag+' ('+tags_count[tag]+')</a>';
+	}).join(' ');
 }
 
 function init(){
