@@ -9,7 +9,7 @@ var tags_count={};
 var search_loaded=false;
 
 function load(){
-	var objs=$$('article');
+	var objs=$$('main li');
 	for(var i=0; i<objs.length; i++){
 		var text=objs[i].lastElementChild.innerHTML.toLowerCase().split('\n');
 		posts[i]={
@@ -98,7 +98,7 @@ function init2(){
 }
 
 function display(posts, max, skip){
-	var par=tag('main');
+	var par=$('main ol');
 	var docFrag = document.createDocumentFragment();
 	if(!skip) {
 		par.innerHTML='';

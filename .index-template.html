@@ -44,10 +44,12 @@ header a, footer a, small a {color: linktext !important}
 	<hr>
 </header>
 <main>
+<ol>
 	<!-- put contents below -->
 	<!-- begin $name -->
-	<article>
-		<h2><a href="$name.html" class="title">$title</a></h2>
+	<li>
+		<b><a href="$name.html" class="title">$title</a></b>
+		<br>
 		<small>
 			Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
 			tags: $htmltags
@@ -57,8 +59,9 @@ header a, footer a, small a {color: linktext !important}
 $created
 $tags
 		--> </div>
-	</article>
+	</li>
 	<!-- end $name -->
+</ol>
 </main>
 <script>
 	document.getElementsByTagName('header')[0].innerHTML=
