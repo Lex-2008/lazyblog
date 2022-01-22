@@ -23,10 +23,13 @@ function die() {
 }
 
 function process_file() {
+	# $1 is *.md file to process;
+	# $2 is a flag - if set, only index.html is changed
 	src="$1"
 	export name="${src%.*}"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	dst="$name.html"
+	test -n "$2" && dst="/dev/null"
 	echo "processing file [$name]..."
 	[ -s "$src" ] || die 11 "ERROR! src file [$src] must exist for process_file"
 	[ "$src" = "$dst" ] && die 12 "ERROR! src file [$src] must NOT end with .html"
@@ -40,12 +43,14 @@ function process_file() {
 			eval export "$key"="\$value"
 		done
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_<a href="./#tag:&">&</a>_g')"
-		sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
-		#echo "Markdown..." >&2
-		Markdown.pl
-		sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+		if test -z "$2"; then
+			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+			#echo "Markdown..." >&2
+			Markdown.pl
+			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+		fi
 	} <"$src" >"$dst"
-	test "$GZIP_HTML" = y && gzip -fk "$dst"
+	test "$GZIP_HTML" = y -a -z "$2" && gzip -fk "$dst"
 	#echo "patching index.html..."
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
@@ -96,6 +101,14 @@ case "$1" in
 		shift
 		SKIP_GZIP_INDEX=1
 		for f in $(ls -tr "$@"); do ( process_file "$f" ) done
+		test "$GZIP_HTML" = y && gzip -fk index.html
+		;;
+	( "reindex" )
+		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
+		rm index.html
+		shift
+		SKIP_GZIP_INDEX=1
+		for f in $(ls -tr "$@"); do ( process_file "$f" only_index ) done
 		test "$GZIP_HTML" = y && gzip -fk index.html
 		;;
 	( "import" )
