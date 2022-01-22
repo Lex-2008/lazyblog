@@ -25,9 +25,9 @@ function load_search(){
 		var matches=post.obj.innerHTML.match(/class="(title|intro)">.*/g);
 		for(var i=0; i<matches.length; i++){
 			if(matches[i][7]=='t'){
-				post.title=matches[i].slice(14,-9).toLowerCase();
+				post.title=matches[i].slice(14,-4).toLowerCase();
 			} else {
-				post.intro=matches[i].slice(14,-4).toLowerCase();
+				post.intro=matches[i].slice(14,-2).toLowerCase();
 			}
 		}
 	});
