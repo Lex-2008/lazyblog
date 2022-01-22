@@ -37,7 +37,7 @@ function load_search(){
 
 function addTags(){
 	id('tags').innerHTML=tags.map(function(tag){
-		return '<a href="#tag:'+tag+'">'+tag+' ('+tags_count[tag]+')</a>';
+		return '<a href="#tag:'+tag+'">'+tag+'&nbsp;('+tags_count[tag]+')</a>';
 	}).join(' ');
 }
 

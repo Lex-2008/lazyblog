@@ -18,14 +18,23 @@ header a, footer a, small a {color: linktext !important}
 <style id="hideall"></style>
 <script>document.getElementById('hideall').innerHTML='body{display:none}'</script>
 <header>
-	<h1><a href="$BLOG_URL/">$BLOG_TITLE</a></h1>
-	<p>$BLOG_INTRO</p>
+	<h1 style="border-bottom: 1px solid lightgray;">
+		$BLOG_TITLE
+		<small style="font: initial;margin-left: 3em">
+			$BLOG_INTRO
+		</small>
+	</h1>
 	<hr>
 	<!--
-	<table>
-		<tr><th>Tags:</th><td id="tags"></td></tr>
-		<tr><th><label for="search">Search:</label></th><td><input type="search" id="search" placeholder="Type to search"></td></tr>
-	</table>
+        <dl>
+                <dt>Filter posts by tags:</dt><dd id="tags"></dd>
+                <dt><label for="search">Search posts:</label></dt>
+                <dd>
+                        <input type="search" id="search" placeholder="Type to search">
+                        <a href="#">(show all posts)</a>
+                </dd>
+        </dl>
+	<hr>
 	-->
 </header>
 <main>
@@ -37,7 +46,7 @@ header a, footer a, small a {color: linktext !important}
 			Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
 			tags: $htmltags
 		</small>
-		<p class="intro">$intro &mdash; <a href="$name.html">Read more...</a></p>
+		<p class="intro">$intro &mdash; <a href="$name.html">read more</a></p>
 		<div> <!-- for scripts
 $created
 $tags
