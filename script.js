@@ -83,16 +83,15 @@ function init(){
 
 function init2(){
 	posts.forEach(function(post){
-		post.obj.querySelector('h2 > a').onkeypress=function(e){
+		var as=post.obj.getElementsByTagName('a');
+		as[0].onkeypress=function(e){
 			if(e.key==' '){
 				e.target.click();
 				return false;
 			}
 		};
-		var as=post.obj.getElementsByTagName('a');
-		for(var i=0; i<as.length; i++){
-			if(as[i].parentNode.tagName != 'H2')
-				as[i].tabIndex=-1;
+		for(var i=1; i<as.length; i++){
+			as[i].tabIndex=-1;
 		};
 	});
 }
