@@ -50,7 +50,7 @@ function process_file() {
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
 	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
-	test "$GZIP_HTML" = y && gzip -fk index.html
+	test "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" && gzip -fk index.html
 }
 
 case "$1" in
@@ -94,7 +94,9 @@ case "$1" in
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
 		rm index.html
 		shift
+		SKIP_GZIP_INDEX=1
 		for f in $(ls -tr "$@"); do ( process_file "$f" ) done
+		test "$GZIP_HTML" = y && gzip -fk index.html
 		;;
 	( "import" )
 		# used when importing to other scripts - does nothing
