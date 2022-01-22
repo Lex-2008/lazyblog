@@ -42,7 +42,7 @@ function process_file() {
 			value="${line#*=}"
 			eval export "$key"="\$value"
 		done
-		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_<a href="./#tag:&">&</a>_g')"
+		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
 		if test -z "$2"; then
 			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
 			#echo "Markdown..." >&2
