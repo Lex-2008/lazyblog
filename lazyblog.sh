@@ -8,8 +8,14 @@ BLOG_TITLE="Notes"
 BLOG_INTRO="Notes about different stuff"
 BLOG_URL="http://alexey.shpakovsky.ru/en"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $htmltags $intro'
+TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $modified $tags $htmltags $intro $style $styles'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
+STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
+s_blockquote_blockquote {border-left:solid 3px gray}_;
+s_cache_a[href^="/cache/"] {font-size:x-small; vertical-align:sub}_;
+s_archive_a[href^="http://archive."] {font-size:x-small; vertical-align:sub}_;
+/{/!d
+'
 
 . .config &> /dev/null
 
@@ -42,6 +48,7 @@ function process_file() {
 			value="${line#*=}"
 			eval export "$key"="\$value"
 		done
+		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
 		if test -z "$2"; then
 			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
