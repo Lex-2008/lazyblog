@@ -42,6 +42,8 @@ function addTags(){
 	id('tags').innerHTML=tags.map(function(tag){
 		return '<a href="#tag:'+tag+'">'+tag+'&nbsp;('+tags_count[tag]+')</a>';
 	}).join(' ');
+	id('showall').innerHTML=
+	id('showall').innerHTML.replace('?', posts.length)
 }
 
 function init(){
