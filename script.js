@@ -7,6 +7,7 @@ var posts=[];
 var tags=[];
 var tags_count={};
 var search_loaded=false;
+var marked_posts=[];
 var user_input=false;
 
 function load(){
@@ -28,7 +29,7 @@ function load_search(){
 			if(matches[i][7]=='t'){
 				post.title=matches[i].slice(14,-4).toLowerCase();
 			} else {
-				post.intro=matches[i].slice(14,-2).toLowerCase();
+				post.intro=matches[i].slice(14,-7).toLowerCase();
 			}
 		}
 	});
@@ -68,6 +69,10 @@ function init(){
 		var params=decodeURIComponent(location.hash).split(':');
 		//if(params.length!=2) return;
 		id('search').value='';
+		if(marked_posts){
+			unmark_posts(marked_posts);
+			marked_posts=[];
+		}
 		switch(params[0]){
 			case '#tag':
 				show_tag(params[1]);
@@ -125,10 +130,17 @@ function show_sorted(param, sort_order=1, posts=window.posts, max=0){
 	}), max);
 }
 
+function unmark_posts(posts){
+	posts.forEach(function(post){
+		post.obj.querySelector('.title').innerHTML=post.title;
+		post.obj.querySelector('.intro').innerHTML=post.intro;
+	});
+}
+
 function search(text, posts=window.posts){
 	if(!search_loaded){load_search()};
 	text=text.toLowerCase();
-	var relevant_posts=posts.map(function(post){
+	marked_posts=posts.map(function(post){
 			var pos;
 			if((pos=post.title.indexOf(text))>-1)
 				post.rel=1e6+pos+'a';
@@ -139,10 +151,17 @@ function search(text, posts=window.posts){
 			return post;
 		}).filter(function(post){
 			return post.rel;
+		}).map(function(post){
+			if(post.rel[0]=='1'){
+				post.obj.querySelector('.title').innerHTML=post.title.replace(text,'<mark>'+text+'</mark>');
+			} else {
+				post.obj.querySelector('.intro').innerHTML=post.intro.replace(text,'<mark>'+text+'</mark>');
+			}
+			return post;
 		});
-	show_sorted('rel',1,relevant_posts);
-	if(user_input && relevant_posts.length==1){
-		relevant_posts[0].obj.getElementsByTagName('a')[0].click();
+	show_sorted('rel',1,marked_posts);
+	if(user_input && marked_posts.length==1){
+		marked_posts[0].obj.getElementsByTagName('a')[0].click();
 	}
 }
 
