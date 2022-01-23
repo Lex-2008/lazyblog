@@ -9,6 +9,7 @@ var tags_count={};
 var search_loaded=false;
 var marked_posts=[];
 var user_input=false;
+var display_timer=0;
 
 function load(){
 	var objs=$$('main li');
@@ -105,6 +106,7 @@ function init2(){
 }
 
 function display(posts, max, skip){
+	clearTimeout(display_timer);
 	var par=$('main ol');
 	var docFrag = document.createDocumentFragment();
 	if(!skip) {
@@ -113,7 +115,7 @@ function display(posts, max, skip){
 	}
 	if(max) {
 		if(max<posts.length)
-			setTimeout(function(){display(posts, 0, max)},1100)
+			display_timer=setTimeout(function(){display(posts, 0, max)},1100);
 		max=Math.min(max, posts.length);
 	} else
 		max=posts.length;
