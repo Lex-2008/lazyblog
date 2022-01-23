@@ -7,6 +7,7 @@ var posts=[];
 var tags=[];
 var tags_count={};
 var search_loaded=false;
+var user_input=false;
 
 function load(){
 	var objs=$$('main li');
@@ -56,6 +57,7 @@ function init(){
 	addTags();
 	id('search').oninput=function(){
 		if(this.value) {
+			user_input=true;
 			location.hash='#search:'+this.value;
 		} else {
 			show_sorted('created',-1);
@@ -73,6 +75,7 @@ function init(){
 			case '#search':
 				id('search').value=params[1];
 				search(params[1]);
+				user_input=false;
 			break;
 			default:
 				show_sorted('created',-1,window.posts,10);
@@ -125,8 +128,7 @@ function show_sorted(param, sort_order=1, posts=window.posts, max=0){
 function search(text, posts=window.posts){
 	if(!search_loaded){load_search()};
 	text=text.toLowerCase();
-	show_sorted('rel',1,
-		posts.map(function(post){
+	var relevant_posts=posts.map(function(post){
 			var pos;
 			if((pos=post.title.indexOf(text))>-1)
 				post.rel=1e6+pos+'a';
@@ -137,8 +139,11 @@ function search(text, posts=window.posts){
 			return post;
 		}).filter(function(post){
 			return post.rel;
-		})
-	);
+		});
+	show_sorted('rel',1,relevant_posts);
+	if(user_input && relevant_posts.length==1){
+		relevant_posts[0].obj.getElementsByTagName('a')[0].click();
+	}
 }
 
 function show_tag(text, posts=window.posts){
