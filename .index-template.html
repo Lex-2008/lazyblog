@@ -16,8 +16,6 @@ header a, footer a, small a {color: linktext !important}
 a.title {font-weight: bolder}
 </style>
 </head><body>
-<style id="hideall"></style>
-<script>document.getElementById('hideall').innerHTML='body{display:none}'</script>
 <header>
 	<h1 style="border-bottom: 1px solid lightgray;">
 		$BLOG_TITLE
@@ -68,12 +66,9 @@ $tags
 <script>
 	document.getElementsByTagName('header')[0].innerHTML=
 	document.getElementsByTagName('header')[0].innerHTML.replace(/<!--|-->/g,'');
-</script>
-<script src="script.js"></script>
-<script>
-	document.getElementById('hideall').innerHTML='';
 	document.getElementById('search').focus();
 </script>
+<script src="script.js"></script>
 <footer>
 	<hr>
 	<p>
