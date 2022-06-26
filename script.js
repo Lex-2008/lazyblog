@@ -58,6 +58,7 @@ function init(){
 		});
 	});
 	tags=Object.keys(tags_count).sort();
+	tag('header').innerHTML=tag('header').innerHTML.replace(/<!--|-->/g,'');
 	addTags();
 	id('search').oninput=function(){
 		if(this.value) {
@@ -68,6 +69,7 @@ function init(){
 			location.hash='';
 		}
 	}
+	id('search').focus();
 	window.onhashchange=function(){
 		var params=decodeURIComponent(location.hash).split(':');
 		//if(params.length!=2) return;
