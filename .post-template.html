@@ -12,14 +12,12 @@ body {
 	hyphens: auto;
 	padding: 1ex; /* for 📱 users*/
 }
-footer {text-align: center}
-header a, footer a, small a {color: linktext !important}
-h1 {border-bottom: 1px solid lightgray}
+header a, footer a, small a {color: inherit !important} /* linktext */
 $styles $style
 </style>
 </head><body>
 <header>
-	<h1>$title</h1>
+	<h1 style="border-bottom: 1px solid lightgray"><a href="$BLOG_URL/">$BLOG_TITLE</a> &gt; $title</h1>
 	<small>
 		Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
 		tags: $htmltags
@@ -30,7 +28,7 @@ $styles $style
 	<p class="intro">$intro</p>
 	=====
 </main>
-<footer>
+<footer style="text-align: center">
 	<hr>
 	<p>
 		<a href="http://creativecommons.org/licenses/by/4.0/" title="Creative Commons Attribution">CC BY</a>
