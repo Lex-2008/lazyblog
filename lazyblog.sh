@@ -107,7 +107,7 @@ case "$1" in
 		rm index.html
 		shift
 		SKIP_GZIP_INDEX=1
-		for f in $(ls -tr "$@"); do process_file "$f"; done
+		for f in $(ls -tr "$@"); do ( process_file "$f" ); done
 		test "$GZIP_HTML" = y && gzip -fk index.html
 		;;
 	( "reindex" )
@@ -115,7 +115,7 @@ case "$1" in
 		rm index.html
 		shift
 		SKIP_GZIP_INDEX=1
-		for f in $(ls -tr "$@"); do process_file "$f" only_index; done
+		for f in $(ls -tr "$@"); do ( process_file "$f" only_index ); done
 		test "$GZIP_HTML" = y && gzip -fk index.html
 		;;
 	( "import" )
