@@ -12,8 +12,8 @@ TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $name $url $title $created $mod
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
 s_blockquote_blockquote {border-left:solid 3px gray}_;
-s_cache_a[href^="/cache/"] {font-size:x-small; vertical-align:sub}_;
-s_archive_a[href^="http://archive."] {font-size:x-small; vertical-align:sub}_;
+s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-align:sub}_;
+s_archive_a[href^="http://archive."],a[href^="https://archive."] {font-size:x-small; vertical-align:sub}_;
 /{/!d
 '
 
