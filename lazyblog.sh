@@ -12,7 +12,8 @@ GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files nex
 TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $PROCESSOR $name $url $title $created $modified $tags $htmltags $intro $style $styles'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
-s_footnotes\?_.footnotes {border-top: 1px solid lightgray;font-size:smaller}_;
+s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
+s_hr_main hr {border: 1px solid #8888}_;
 s_blockquote_blockquote {border-left:solid 3px gray}_;
 s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-align:sub}_;
 s_archive_a[href^="http://archive."],a[href^="https://archive."] {font-size:x-small; vertical-align:sub}_;
