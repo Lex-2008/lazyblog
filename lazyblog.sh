@@ -40,7 +40,7 @@ function process_file() {
 	export name="${src%.*}"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	dst="$name.html"
-	test "$2" = "reindex" && dst="/dev/null"
+	[ "$2" = "reindex" ] && dst="/dev/null"
 	echo "processing file [$name]..."
 	[ -s "$src" ] || die 11 "ERROR! src file [$src] must exist for process_file"
 	[ "$src" = "$dst" ] && die 12 "ERROR! src file [$src] must NOT end with .html"
@@ -62,13 +62,13 @@ function process_file() {
 			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
 		fi
 	} <"$src" >"$dst"
-	test "$GZIP_HTML" = y -a "$2" != "reindex" && gzip -fk "$dst"
-	test "$2" = "draft" && return
+	[ "$GZIP_HTML" = y -a "$2" != "reindex" ] && gzip -fk "$dst"
+	[ "$2" = "draft" ] && return
 	#echo "patching index.html..."
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
 	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
-	test "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" && gzip -fk index.html
+	[ "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" ] && gzip -fk index.html
 }
 
 case "$1" in
@@ -79,7 +79,7 @@ case "$1" in
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
 		rm "$name.html" "$name.html.gz"
-		test "$1" == "rmrf" && rm -rf $name.* $name/
+		[ "$1" == "rmrf" ] && rm -rf $name.* $name/
 		;;
 	( "mv" | "rename" )
 		name="${2%.*}"
@@ -117,7 +117,7 @@ case "$1" in
 		shift
 		SKIP_GZIP_INDEX=1
 		for f in $(ls -tr "$@"); do ( process_file "$f" "$cmd" ); done
-		test "$GZIP_HTML" = y && gzip -fk index.html
+		[ "$GZIP_HTML" = y ] && gzip -fk index.html
 		;;
 	( "import" )
 		# used when importing to other scripts - does nothing
