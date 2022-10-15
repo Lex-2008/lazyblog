@@ -33,12 +33,14 @@ function die() {
 
 function process_file() {
 	# $1 is *.md file to process;
-	# $2 is a flag - if set, only index.html is changed
+	# $2 is a flag:
+	#   if set to "reindex", then only index.html is changed, not actual blog post file
+	#   if set to "draft", then index.html is *not* changed, blog post file is created "unlisted"
 	src="$1"
 	export name="${src%.*}"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	dst="$name.html"
-	test -n "$2" && dst="/dev/null"
+	test "$2" = "reindex" && dst="/dev/null"
 	echo "processing file [$name]..."
 	[ -s "$src" ] || die 11 "ERROR! src file [$src] must exist for process_file"
 	[ "$src" = "$dst" ] && die 12 "ERROR! src file [$src] must NOT end with .html"
@@ -53,14 +55,15 @@ function process_file() {
 		done
 		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
-		if test -z "$2"; then
+		if [ "$2" != "reindex" ]; then
 			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
 			#echo "Markdown..." >&2
 			$PROCESSOR
 			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
 		fi
 	} <"$src" >"$dst"
-	test "$GZIP_HTML" = y -a -z "$2" && gzip -fk "$dst"
+	test "$GZIP_HTML" = y -a "$2" != "reindex" && gzip -fk "$dst"
+	test "$2" = "draft" && return
 	#echo "patching index.html..."
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
@@ -78,14 +81,14 @@ case "$1" in
 		rm "$name.html" "$name.html.gz"
 		test "$1" == "rmrf" && rm -rf $name.* $name/
 		;;
-	( "mv" )
+	( "mv" | "rename" )
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
 		rm "$name.html" "$name.html.gz"
 		mv "$2" "$3"
 		process_file "$3"
 		;;
-	( "post" )
+	( "post" | "draft" )
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
@@ -95,9 +98,11 @@ case "$1" in
 		[ -z "$title" ] && die 26 "ERROR! \$title not set!"
 		new_filename="$(echo $title | eval "$TITLE_TO_FILENAME")"
 		[ -z "$new_filename" ] && die 28 "ERROR! \$title does not contain valid characters!" #TODO: call it blog-post, maybe
+		[ "$1" = "draft" ] && new_filename=".$new_filename"
 		[ -f "$new_filename.html" ] && die 29 "ERROR! file [$new_filename.html] already exist!" #TODO: add numbers
 		mv .new-post.md "$new_filename.md"
-		process_file "$new_filename.md"
+		process_file "$new_filename.md" "$1"
+		[ -f "$2" && "$2" != "$new_filename.md" ] && echo rm "$2"
 		;;
 	( "edit" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
@@ -105,20 +110,13 @@ case "$1" in
 		$EDITOR "$2"
 		process_file "$2"
 		;;
-	( "rebuild" )
+	( "rebuild" | "reindex" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
+		cmd="$1"
 		rm index.html
 		shift
 		SKIP_GZIP_INDEX=1
-		for f in $(ls -tr "$@"); do ( process_file "$f" ); done
-		test "$GZIP_HTML" = y && gzip -fk index.html
-		;;
-	( "reindex" )
-		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
-		rm index.html
-		shift
-		SKIP_GZIP_INDEX=1
-		for f in $(ls -tr "$@"); do ( process_file "$f" only_index ); done
+		for f in $(ls -tr "$@"); do ( process_file "$f" "$cmd" ); done
 		test "$GZIP_HTML" = y && gzip -fk index.html
 		;;
 	( "import" )
