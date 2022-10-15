@@ -60,7 +60,7 @@ function process_file() {
 		fi
 	} <"$src" >"$dst"
 	[ "$GZIP_HTML" = y -a "$CMD" != "reindex" ] && gzip -fk "$dst"
-	[ "$CMD" = "draft" ] && return
+	[ "${name:0:1}" = . ] && return # do not add drafts to index.html
 	#echo "patching index.html..."
 	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
 	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
@@ -68,19 +68,31 @@ function process_file() {
 	[ "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" ] && gzip -fk index.html
 }
 
+case "$1" in
+	( "publish" )   # convert draft to post (rename, remove . from name)
+		[ "${2:0:1}" = . ] || die 31 "filename [$2] doesn't look like a draft"
+		set -- mv "$2" "${2:1}"
+		;;
+	( "unpublish" ) # convert post to draft (rename, add . to filename)
+		[ "${2:0:1}" = . ] && die 32 "filename [$2] look like already a draft"
+		set -- mv "$2" ".$2"
+		;;
+esac
+
 CMD="$1"
 
 case "$CMD" in
 	( "add" | "update" | "file" ) # just process a file
 		process_file "$2"
 		;;
-	( "rm" | "rmrf" ) # remove the file, rmrf additionally removes all files with same basename
+	( "rm" | "rmrf" ) # rm removes entry from index and *.html file, rmrf additionally removes all files with same basename, including *.md source
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
+		[ "$GZIP_HTML" = y ] && gzip -fk index.html
 		rm "$name.html" "$name.html.gz"
 		[ "$CMD" = "rmrf" ] && rm -rf $name.* $name/
 		;;
-	( "mv" | "rename" | "publish" ) # rename a published file, also publish a draft
+	( "mv" | "rename" ) # rename a file
 		[ -z "$2" -o -z "$3" ] && die 21 "ERROR! pass two arguments: old and new filename"
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
 		[ -f "$3" ] && die 29 "ERROR! file [$3] already exist!"
@@ -89,8 +101,11 @@ case "$CMD" in
 		rm "$name.html" "$name.html.gz"
 		mv "$2" "$3"
 		process_file "$3"
+		# when move destination is a draft - then process_file doesn't touch index.html,
+		# thus doesn't recompress it. Let's do it here
+		[ "${3:0:1}" = . -a "$GZIP_HTML" = y ] && gzip -fk index.html
 		;;
-	( "post" | "draft" ) # add a post or draft, pass optional file with draft text
+	( "post" | "draft" ) # add a post or draft, pass optional file with initial text
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
