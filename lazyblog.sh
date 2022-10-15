@@ -71,23 +71,26 @@ function process_file() {
 CMD="$1"
 
 case "$CMD" in
-	( "add" | "update" | "file" )
+	( "add" | "update" | "file" ) # just process a file
 		process_file "$2"
 		;;
-	( "rm" | "rmrf" )
+	( "rm" | "rmrf" ) # remove the file, rmrf additionally removes all files with same basename
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
 		rm "$name.html" "$name.html.gz"
 		[ "$CMD" = "rmrf" ] && rm -rf $name.* $name/
 		;;
-	( "mv" | "rename" )
+	( "mv" | "rename" | "publish" ) # rename a published file, also publish a draft
+		[ -z "$2" -o -z "$3" ] && die 21 "ERROR! pass two arguments: old and new filename"
+		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
+		[ -f "$3" ] && die 29 "ERROR! file [$3] already exist!"
 		name="${2%.*}"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
 		rm "$name.html" "$name.html.gz"
 		mv "$2" "$3"
 		process_file "$3"
 		;;
-	( "post" | "draft" )
+	( "post" | "draft" ) # add a post or draft, pass optional file with draft text
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
 		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
@@ -117,11 +120,11 @@ case "$CMD" in
 		for f in $(ls -tr "$@"); do ( process_file "$f" ); done
 		[ "$GZIP_HTML" = y ] && gzip -fk index.html
 		;;
-	( "import" )
-		# used when importing to other scripts - does nothing
+	( "import" ) # used when importing to other scripts - does nothing
 		;;
-	( "*" )
-		echo "some help text"
+	( * ) # any other command - prints this text
+		echo "use one of the following commands:"
+		grep '^\s*(' "$0"
 		;;
 esac
 
