@@ -16,7 +16,7 @@ s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
 s_hr_main hr {border: 1px solid #8888}_;
 s_blockquote_blockquote {border-left:solid 3px gray}_;
 s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-align:sub}_;
-s_archive_a[href^="http://archive."],a[href^="https://archive."] {font-size:x-small; vertical-align:sub}_;
+s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https://web.archive.org"] {font-size:x-small; vertical-align:sub}_;
 /{/!d
 '
 
