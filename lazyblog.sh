@@ -121,7 +121,7 @@ case "$CMD" in
 		[ -f "$new_filename.html" ] && die 29 "ERROR! file [$new_filename.html] already exist!" #TODO: add numbers
 		mv .new-post.md "$new_filename.md"
 		process_file "$new_filename.md"
-		[ -f "$2" && "$2" != "$new_filename.md" ] && echo rm "$2"
+		[ -f "$2" -a "$2" != "$new_filename.md" ] && echo rm "$2"
 		;;
 	( "edit" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
