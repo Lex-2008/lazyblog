@@ -9,7 +9,7 @@ BLOG_INTRO="Notes about different stuff"
 BLOG_URL="http://alexey.shpakovsky.ru/en"
 PROCESSOR="cmark-gfm --unsafe -e footnotes -e table -e strikethrough -e tasklist --strikethrough-double-tilde"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $PROCESSOR $name $url $title $created $modified $tags $htmltags $intro $style $styles'
+TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $PROCESSOR $name $url $title $texttitle $created $modified $tags $htmltags $intro $textintro $style $styles'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
@@ -52,6 +52,8 @@ function process_file() {
 		done
 		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
+		export texttitle="$(echo "$title" | sed -r 's/<[^>]*>//g')"
+		export textintro="$(echo "$intro" | sed -r 's_"__g;s/<[^>]*>//g')"
 		if [ "$CMD" != "reindex" ]; then
 			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
 			#echo "Markdown..." >&2
