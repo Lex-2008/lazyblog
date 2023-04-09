@@ -97,6 +97,9 @@ function init(){
 				searchTags(params[1]);
 				user_input=false;
 			break;
+			case '#random':
+				window.posts[Math.floor(Math.random()*posts.length)].obj.querySelector('.title').click();
+			break;
 			default:
 				show_sorted('created',-1,window.posts,10);
 		}
