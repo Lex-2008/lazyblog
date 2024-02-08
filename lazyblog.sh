@@ -89,6 +89,7 @@ case "$CMD" in
 		;;
 	( "rm" | "rmrf" ) # rm removes entry from index and *.html file, rmrf additionally removes all files with same basename, including *.md source
 		name="${2%.*}"
+		test -z "$name" && die 21 "pass argument to a file.html"
 		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
 		[ "$GZIP_HTML" = y ] && gzip -fk index.html
 		rm "$name.html" "$name.html.gz"
