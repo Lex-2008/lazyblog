@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE xsl:stylesheet [ <!ENTITY mdash "&#8212;"> <!ENTITY nbsp "&#160;"> ]>
+<root>
+	<header>
+		<last-update>
+			Last update:
+		</last-update>
+		<links>
+			You may also like my:
+		</links>
+	</header>
+	<filter>
+		<by-tags>
+			Filter posts by tags:
+		</by-tags>
+		<by-search>
+			Filter posts and tags by search:
+		</by-search>
+		<search-placeholder>
+			Type to search
+		</search-placeholder>
+		<show-all>
+		<pre>
+			(show all
+		</pre>
+		<post>
+			posts)
+		</post>
+		</show-all>
+	</filter>
+	<small>
+		<published>
+			Created:
+		</published>
+		<updated>
+			modified:
+		</updated>
+		<tags>
+			tags:
+		</tags>
+		<sep>
+			&mdash;
+		</sep>
+	</small>
+	<read-more>
+		<sep>
+			&mdash;
+		</sep>
+		<text>
+			read more
+		</text>
+	</read-more>
+	<footer>
+		<sep>
+			&mdash;
+		</sep>
+		<show-email>
+			click to show e-mail
+		</show-email>
+		<generator>
+			Generated with:
+		</generator>
+	</footer>
+</root>

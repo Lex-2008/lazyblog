@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?lazyblog-url $LAZYBLOG_URL?>
+<?xml-stylesheet href="$LAZYBLOG_URL/atom2html.xsl" type="text/xsl"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="$BLOG_LANG">
+	<title>$BLOG_TITLE</title>
+	<subtitle>$BLOG_INTRO</subtitle>
+	<updated>...</updated>
+	<id>$BLOG_URL</id>
+	<link rel="self" href="$BLOG_URL/"/>
+$BLOG_LINKS
+	<author>
+		<name>$BLOG_AUTHOR</name>
+		<uri>$BLOG_AUTHOR_URL</uri>
+	</author>
+	<rights>$BLOG_RIGHTS</rights>
+	<generator uri="https://github.com/lex-2008/lazyblog">lazyblog</generator>
+	<!-- put contents below -->
+	<entry> <!-- begin $name -->
+		<title>$texttitle</title>
+		<link href="$BLOG_URL/$url"/>
+		<id>urn:uuid:$uuid</id>
+		<updated>$modifiedTZ</updated>
+		<published>$createdTZ</published>
+		<content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">
+			$intro
+		</div></content>
+$xmltags
+	</entry> <!-- end $name -->
+</feed>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE xsl:stylesheet [ <!ENTITY mdash "&#8212;"> <!ENTITY nbsp "&#160;"> ]>
+<root>
+	<header>
+		<last-update>
+			Последнее обновление:
+		</last-update>
+		<links>
+			Также смотрите:
+		</links>
+	</header>
+	<filter>
+		<by-tags>
+			Фильтровать записи по тегам:
+		</by-tags>
+		<by-search>
+
+		</by-search>
+		<search-placeholder>
+			Введите текст для поиска
+		</search-placeholder>
+		<show-all>
+		<pre>
+			(показать все записи -
+		</pre>
+		<post>
+			шт)
+		</post>
+		</show-all>
+	</filter>
+	<small>
+		<published>
+			Создано:
+		</published>
+		<updated>
+			изменено:
+		</updated>
+		<tags>
+			метки:
+		</tags>
+		<sep>
+			&mdash;
+		</sep>
+	</small>
+	<read-more>
+		<sep>
+			&mdash;
+		</sep>
+		<text>
+			читать далее
+		</text>
+	</read-more>
+	<footer>
+		<sep>
+			&mdash;
+		</sep>
+		<show-email>
+			показать e-mail
+		</show-email>
+		<generator>
+			Создано с помощью:
+		</generator>
+	</footer>
+</root>

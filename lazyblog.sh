@@ -1,20 +1,31 @@
 #!/bin/bash
 
-TEXT_TEMPLATE=".template.md"
-POST_TEMPLATE=".post-template.html"
-INDEX_TEMPLATE=".index-template.html"
+LAZYBLOG_DIR="../lazyblog"
+LAZYBLOG_URL="/lazyblog"
+TEXT_TEMPLATE="$LAZYBLOG_DIR/template.md"
+POST_TEMPLATE="$LAZYBLOG_DIR/post-template.html"
+INDEX_TEMPLATE="$LAZYBLOG_DIR/index-template.xml"
+INDEX_PAGE="index.xml"
 DATE_FORMAT="%F"
 BLOG_TITLE="Notes"
 BLOG_INTRO="Notes about different stuff"
 BLOG_URL="http://alexey.shpakovsky.ru/en"
+BLOG_LINKS="http://alexey.shpakovsky.ru/ru/ Russian blog|http://alexey.shpakovsky.ru/photos/en.html Photo Archive|https://github.com/Lex-2008/ GitHub"
+BLOG_AUTHOR="Alexey Shpakovsky"
+BLOG_AUTHOR_URL="http://alexey.shpakovsky.ru/"
+BLOG_RIGHTS="CC BY"
+BLOG_RIGHTS_LONG="Creative Commons Attribution 4.0 International"
+BLOG_RIGHTS_URL="https://creativecommons.org/licenses/by/4.0/"
+BLOG_LANG="en"
 PROCESSOR="cmark-gfm --unsafe -e footnotes -e table -e strikethrough -e tasklist --strikethrough-double-tilde"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST='$BLOG_TITLE $BLOG_INTRO $BLOG_URL $PROCESSOR $name $url $title $texttitle $created $modified $tags $htmltags $intro $textintro $style $styles'
-TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//'"
+TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG'
+TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles'
+TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//;s/-\\+/-/'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
 s_hr_main hr {border: 1px solid #8888}_;
-s_blockquote_blockquote {border-left:solid 3px gray}_;
+s_blockquote_blockquote {border-left:solid 3px gray;margin-left:1em;padding-left:1em}_;
 s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-align:sub}_;
 s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https://web.archive.org"] {font-size:x-small; vertical-align:sub}_;
 /{/!d
@@ -22,20 +33,53 @@ s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https:
 
 . .config &> /dev/null
 
-export BLOG_TITLE BLOG_INTRO BLOG_URL PROCESSOR
+BLOG_LINKS="$(echo "$BLOG_LINKS" | tr '|' '\n' | sed -r 's_^([^ ]+) (.*)_\t<link rel="related" href="\1" title="\2"/>_')"
+
+BLOG_RIGHTS_HTML="<a $(test -n "$BLOG_RIGHTS_URL" && echo "href='$BLOG_RIGHTS_URL'") $(test -n "$BLOG_RIGHTS_LONG" && echo "title='$BLOG_RIGHTS_LONG'")>$BLOG_RIGHTS</a>"
+
+test -n "$BLOG_RIGHTS_LONG" && BLOG_RIGHTS="$BLOG_RIGHTS ($BLOG_RIGHTS_LONG)"
+test -n "$BLOG_RIGHTS_URL" && BLOG_RIGHTS="$BLOG_RIGHTS $BLOG_RIGHTS_URL"
+
+export `echo "$TEMPLATE_LIST_MAIN" | tr -d '$'` PROCESSOR
 
 set +o histexpand
 
-function die() {
+die() {
 	echo "$2" >&2
 	exit "$1"
 }
 
-function process_file() {
+rfc_date() {
+	local a="$(date "$@" --utc --rfc-3339=seconds)"
+	echo "${a/ /T}"
+}
+
+# https://github.com/sfinktah/bash/blob/master/rawurlencode.inc.sh
+# https://stackoverflow.com/questions/296536/how-to-urlencode-data-for-curl-command
+rawurlencode() {
+	local string="${1}"
+	local strlen=${#string}
+	local encoded=""
+	local pos c o
+	for (( pos=0 ; pos<strlen ; pos++ )); do
+		c="${string:$pos:1}"
+		case "$c" in
+			( [-_.~/a-zA-Z0-9] ) o="${c}"
+				;;
+			( * ) printf -v o '%%%02x' "'$c"
+		esac
+		encoded+="${o}"
+	done
+	echo "${encoded}"
+}
+
+process_file() {
 	# $1 is *.md file to process
 	src="$1"
 	export name="${src%.*}"
+	export url="$(rawurlencode "$name").html"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
+	export modifiedTZ="$(rfc_date -r "$1")"
 	dst="$name.html"
 	[ "$CMD" = "reindex" ] && dst="/dev/null"
 	echo "processing file [$name]..."
@@ -51,23 +95,25 @@ function process_file() {
 			eval export "$key"="\$value"
 		done
 		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
+		export xmltags="$(echo "$tags" | tr ' ' '\n' | sed -r 's_([^ ]+)_\L\t\t<category term="&"/>_g')"
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
-		export texttitle="$(echo "$title" | sed -r 's/<[^>]*>//g')"
-		export textintro="$(echo "$intro" | sed -r 's_"__g;s/<[^>]*>//g')"
+		export texttitle="$(echo "$title" | sed -r 's/<[^>]*>//g;s/&[a-z]+;//g')"
+		export textintro="$(echo "$intro" | sed -r 's_"__g;s/<[^>]*>//g;s/&[a-z]+;//g')"
+		export createdTZ="$(rfc_date --date="$created")"
 		if [ "$CMD" != "reindex" ]; then
-			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST_PAGE"
 			#echo "Markdown..." >&2
 			$PROCESSOR
-			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST"
+			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST_PAGE"
 		fi
 	} <"$src" >"$dst"
 	[ "$GZIP_HTML" = y -a "$CMD" != "reindex" ] && gzip -fk "$dst"
 	[ "${name:0:1}" = . ] && return # do not add drafts to index.html
 	#echo "patching index.html..."
-	[ -f index.html ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst '$BLOG_TITLE $BLOG_INTRO $BLOG_URL' >index.html
-	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST")"
-	sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") index.html
-	[ "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" ] && gzip -fk index.html
+	[ -f "$INDEX_PAGE" ] || sed '/<!-- begin $name -->/,/<!-- end $name -->/d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST_MAIN" >"$INDEX_PAGE"
+	index_part="$(sed '/<!-- begin $name -->/,/<!-- end $name -->/!d' "$INDEX_TEMPLATE" | envsubst "$TEMPLATE_LIST_PAGE")"
+	sed -i "0,/<updated>/s/updated>.*</updated>$(rfc_date)</;/<!-- begin $name -->/,/<!-- end $name -->/d;/<!-- put contents below -->/r "<(echo "$index_part") "$INDEX_PAGE"
+	[ "$GZIP_HTML" = y -a -z "$SKIP_GZIP_INDEX" ] && gzip -fk "$INDEX_PAGE"
 }
 
 case "$1" in
@@ -90,8 +136,8 @@ case "$CMD" in
 	( "rm" | "rmrf" ) # rm removes entry from index and *.html file, rmrf additionally removes all files with same basename, including *.md source
 		name="${2%.*}"
 		test -z "$name" && die 21 "pass argument to a file.html"
-		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
-		[ "$GZIP_HTML" = y ] && gzip -fk index.html
+		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" "$INDEX_PAGE"
+		[ "$GZIP_HTML" = y ] && gzip -fk "$INDEX_PAGE"
 		rm "$name.html" "$name.html.gz"
 		[ "$CMD" = "rmrf" ] && rm -rf $name.* $name/
 		;;
@@ -100,13 +146,13 @@ case "$CMD" in
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
 		[ -f "$3" ] && die 29 "ERROR! file [$3] already exist!"
 		name="${2%.*}"
-		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" index.html
+		sed -i "/<!-- begin $name -->/,/<!-- end $name -->/d" "$INDEX_PAGE"
 		rm "$name.html" "$name.html.gz"
 		mv "$2" "$3"
 		process_file "$3"
 		# when move destination is a draft - then process_file doesn't touch index.html,
 		# thus doesn't recompress it. Let's do it here
-		[ "${3:0:1}" = . -a "$GZIP_HTML" = y ] && gzip -fk index.html
+		[ "${3:0:1}" = . -a "$GZIP_HTML" = y ] && gzip -fk "$INDEX_PAGE"
 		;;
 	( "post" | "draft" ) # add a post or draft, pass optional file with initial text
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
@@ -132,11 +178,11 @@ case "$CMD" in
 		;;
 	( "rebuild" | "reindex" )
 		[ -f "$2" ] || die 23 "ERROR! file [$2] does not exist!"
-		rm index.html
+		rm "$INDEX_PAGE"
 		shift
 		SKIP_GZIP_INDEX=1
 		for f in $(ls -tr "$@"); do ( process_file "$f" ); done
-		[ "$GZIP_HTML" = y ] && gzip -fk index.html
+		[ "$GZIP_HTML" = y ] && gzip -fk "$INDEX_PAGE"
 		;;
 	( "import" ) # used when importing to other scripts - does nothing
 		;;
