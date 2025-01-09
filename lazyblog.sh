@@ -17,10 +17,11 @@ BLOG_RIGHTS="CC BY"
 BLOG_RIGHTS_LONG="Creative Commons Attribution 4.0 International"
 BLOG_RIGHTS_URL="https://creativecommons.org/licenses/by/4.0/"
 BLOG_LANG="en"
+TRACKER_CODE="<script async='' data-info-to='/info/' data-hello-to='/hello/' src='$LAZYBLOG_URL/page.js'></script>"
 PROCESSOR="cmark-gfm --unsafe -e footnotes -e table -e strikethrough -e tasklist --strikethrough-double-tilde"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG'
-TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles'
+TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG $TRACKER_CODE $TRACKER_CODE_XML'
+TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $tracker_code'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//;s/-\\+/-/'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
@@ -34,8 +35,9 @@ s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https:
 . .config &> /dev/null
 
 BLOG_LINKS="$(echo "$BLOG_LINKS" | tr '|' '\n' | sed -r 's_^([^ ]+) (.*)_\t<link rel="related" href="\1" title="\2"/>_')"
-
 BLOG_RIGHTS_HTML="<a $(test -n "$BLOG_RIGHTS_URL" && echo "href='$BLOG_RIGHTS_URL'") $(test -n "$BLOG_RIGHTS_LONG" && echo "title='$BLOG_RIGHTS_LONG'")>$BLOG_RIGHTS</a>"
+
+test -n "$TRACKER_CODE" && TRACKER_CODE_XML="<div id='tracker-code' xmlns='http://www.w3.org/1999/xhtml'>$TRACKER_CODE</div>"
 
 test -n "$BLOG_RIGHTS_LONG" && BLOG_RIGHTS="$BLOG_RIGHTS ($BLOG_RIGHTS_LONG)"
 test -n "$BLOG_RIGHTS_URL" && BLOG_RIGHTS="$BLOG_RIGHTS $BLOG_RIGHTS_URL"
@@ -80,6 +82,8 @@ process_file() {
 	export url="$(rawurlencode "$name").html"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	export modifiedTZ="$(rfc_date -r "$1")"
+	[ "${name:0:1}" = . ] && tracker_code='' || tracker_code="$TRACKER_CODE" # $tracker_code (lowercase) NOT on draft pages
+	export tracker_code
 	dst="$name.html"
 	[ "$CMD" = "reindex" ] && dst="/dev/null"
 	echo "processing file [$name]..."
@@ -157,7 +161,7 @@ case "$CMD" in
 	( "post" | "draft" ) # add a post or draft, pass optional file with initial text
 		[ -s "$TEXT_TEMPLATE" ] || die 27 "ERROR! file [$TEXT_TEMPLATE] must exist for posting"
 		[ -z "$EDITOR" ] && die 25 "ERROR! \$EDITOR variable must be set!"
-		eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
+		[ -f .new-post.md ] || eval "echo \"$(cat "$TEXT_TEMPLATE")\"" >.new-post.md
 		[ -s "$2" ] && cat "$2" >>.new-post.md
 		$EDITOR ".new-post.md"
 		title="$(sed '/^title=/!d;s/^title=//' .new-post.md)"

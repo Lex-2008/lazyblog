@@ -7,6 +7,7 @@
 	<xsl:variable name="base" select="/atom:feed/atom:link/@href"/>
 	<xsl:variable name="base_len" select="string-length($base)"/>
 	<xsl:variable name="lazyblog-url" select="/processing-instruction('lazyblog-url')"/>
+	<xsl:variable name="tracker-code" select="/atom:feed/*[@id='tracker-code']"/>
 	<xsl:variable name="lang" select="document(concat($lazyblog-url, '/lang-', /atom:feed/@xml:lang, '.xml'))/*"/>
 	<xsl:variable name="uniq_tags" select="/atom:feed/atom:entry/atom:category[not(@term=preceding::*/@term)]"/>
 	<xsl:template match="/">
@@ -184,6 +185,9 @@
 					-->
 					</p>
 				</footer>
+				<xsl:if test="$tracker-code">
+					<xsl:copy-of select="$tracker-code"/>
+				</xsl:if>
 			</body>
 		</html>
 	</xsl:template>
@@ -191,10 +195,11 @@
 	<xsl:template name="entry">
 		<xsl:param name="entry"/>
 		<xsl:variable name="relative_url" select="substring($entry/atom:link/@href, $base_len+1)"/>
-		<xsl:variable name="name_only" select="substring($relative_url, 0, string-length($relative_url)-string-length('.html')+1)"/>
+		<xsl:variable name="uuid" select="substring-after($entry/atom:id, 'urn:uuid:')"/>
+		<!-- <xsl:variable name="name_only" select="substring($relative_url, 0, string&#45;length($relative_url)&#45;string&#45;length('.html')+1)"/> -->
 			<a class="title">
 				<xsl:call-template name="view-transition-name">
-					<xsl:with-param name="name" select="$name_only"/>
+					<xsl:with-param name="uuid" select="$uuid"/>
 					<xsl:with-param name="type">title</xsl:with-param>
 				</xsl:call-template>
 				<xsl:attribute name="href">
@@ -204,7 +209,7 @@
 			</a>
 			<small>
 				<xsl:call-template name="view-transition-name">
-					<xsl:with-param name="name" select="$name_only"/>
+					<xsl:with-param name="uuid" select="$uuid"/>
 					<xsl:with-param name="type">small</xsl:with-param>
 				</xsl:call-template>
 				<xsl:value-of select="$lang/small/published"/>
@@ -231,7 +236,7 @@
 			<!-- <div>&#38;nbsp;</div> <!&#45;&#45; gap  &#45;&#45;> -->
 			<div class="intro">
 				<xsl:call-template name="view-transition-name">
-					<xsl:with-param name="name" select="$name_only"/>
+					<xsl:with-param name="uuid" select="$uuid"/>
 					<xsl:with-param name="type">intro</xsl:with-param>
 				</xsl:call-template>
 					<xsl:copy-of select="$entry/atom:content/*"/>
@@ -307,13 +312,13 @@
 	</xsl:template>
 
 	<xsl:template name="view-transition-name">
-		<xsl:param name="name"/>
+		<xsl:param name="uuid"/>
 		<xsl:param name="type"/>
 		<xsl:attribute name="style">
 			<xsl:text>view-transition-name:</xsl:text>
-			<xsl:value-of select="$name"/>
-			<xsl:text>-</xsl:text>
 			<xsl:value-of select="$type"/>
+			<xsl:text>-</xsl:text>
+			<xsl:value-of select="$uuid"/>
 		</xsl:attribute>
 	</xsl:template>
 

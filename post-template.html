@@ -18,15 +18,15 @@ $styles $style
 </style>
 </head><body>
 <header>
-	<h1 style="border-bottom: 1px solid #8888"><span style="view-transition-name:macos-autologin-password-title">$title</span></h1>
-	<small style="display:block; view-transition-name:$name-small">
+	<h1 style="border-bottom: 1px solid #8888"><span style="view-transition-name:title-$uuid">$title</span></h1>
+	<small style="display:block; view-transition-name:small-$uuid">
 		Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
 		tags: $htmltags
 	</small>
 	<hr>
 </header>
 <main>
-	<p class="intro" style="view-transition-name:$name-intro">$intro</p>
+	<p class="intro" style="view-transition-name:intro-$uuid">$intro</p>
 	=====
 </main>
 <footer style="text-align: center">
@@ -37,5 +37,5 @@ $styles $style
 		<a href="./">show all posts</a> &mdash;
 		<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">show e-mail</a>
 	</p>
-</footer>
+</footer>$tracker_code
 </body></html>
