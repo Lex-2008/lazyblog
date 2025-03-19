@@ -36,8 +36,14 @@ SCRIPTS_TO_HTML='s_live_<script>(new WebSocket((location.protocol[4]=="s"?"wss":
 /script/!d
 '
 
+die() {
+	echo "$2" >&2
+	exit "$1"
+}
+
 . .config &> /dev/null
-. "$LAZYBLOG_DIR/lang-$BLOG_LANG.sh" &>/dev/null
+test -f "$LAZYBLOG_DIR/lang-$BLOG_LANG.sh" || die 1 "$LAZYBLOG_DIR/lang-$BLOG_LANG.sh not found"
+. "$LAZYBLOG_DIR/lang-$BLOG_LANG.sh"
 
 BLOG_LINKS="$(echo "$BLOG_LINKS" | tr '|' '\n' | sed -r 's_^([^ ]+) (.*)_\t<link rel="related" href="\1" title="\2"/>_')"
 BLOG_RIGHTS_HTML="<a $(test -n "$BLOG_RIGHTS_URL" && echo "href='$BLOG_RIGHTS_URL'") $(test -n "$BLOG_RIGHTS_LONG" && echo "title='$BLOG_RIGHTS_LONG'")>$BLOG_RIGHTS</a>"
@@ -47,14 +53,9 @@ test -n "$TRACKER_CODE" && TRACKER_CODE_XML="<div id='tracker-code' xmlns='http:
 test -n "$BLOG_RIGHTS_LONG" && BLOG_RIGHTS="$BLOG_RIGHTS ($BLOG_RIGHTS_LONG)"
 test -n "$BLOG_RIGHTS_URL" && BLOG_RIGHTS="$BLOG_RIGHTS $BLOG_RIGHTS_URL"
 
-export `echo "$TEMPLATE_LIST_MAIN" | tr -d '$'` PROCESSOR
+export `echo "$TEMPLATE_LIST_MAIN $TEMPLATE_LIST_LANG" | tr -d '$'` PROCESSOR
 
 set +o histexpand
-
-die() {
-	echo "$2" >&2
-	exit "$1"
-}
 
 rfc_date() {
 	local a="$(date "$@" --utc --rfc-3339=seconds)"
