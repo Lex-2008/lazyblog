@@ -20,12 +20,12 @@
 			Type to search
 		</search-placeholder>
 		<show-all>
-		<pre>
-			(show all
-		</pre>
-		<post>
-			posts)
-		</post>
+			<pre>
+				(show all
+			</pre>
+			<post>
+				posts)
+			</post>
 		</show-all>
 	</filter>
 	<small>

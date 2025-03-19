@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
+<!doctype html><html lang="$BLOG_LANG"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="$BLOG_URL/$name.html">
 <title>$texttitle</title>
@@ -20,8 +20,8 @@ $styles $style
 <header>
 	<h1 style="border-bottom: 1px solid #8888"><span style="view-transition-name:title-$uuid">$title</span></h1>
 	<small style="display:block; view-transition-name:small-$uuid">
-		Created: <time>$created</time> &mdash; modified: <time>$modified</time> &mdash;
-		tags: $htmltags
+		$lang_small_published <time>$created</time> $lang_small_sep $lang_small_updated <time>$modified</time> $lang_small_sep
+		$lang_small_tags $htmltags
 	</small>
 	<hr>
 </header>
@@ -33,9 +33,10 @@ $styles $style
 	<hr>
 	<p>
 		$BLOG_RIGHTS_HTML
-		<a href="$BLOG_AUTHOR_URL">$BLOG_AUTHOR</a> &mdash;
-		<a href="./">show all posts</a> &mdash;
-		<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">show e-mail</a>
+		<a href="$BLOG_AUTHOR_URL">$BLOG_AUTHOR</a> $lang_footer_sep
+		<a href="./">$lang_footer_show_all</a> $lang_footer_sep
+		<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">$lang_footer_show_email</a>
 	</p>
-</footer>$tracker_code
+</footer>
+$scripts $tracker_code
 </body></html>

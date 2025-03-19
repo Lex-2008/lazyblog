@@ -1,0 +1,7 @@
+lang_small_published="Создано:"
+lang_small_updated="изменено:"
+lang_small_tags="теги:"
+lang_small_sep="&mdash;"
+lang_footer_sep="&mdash;"
+lang_footer_show_all="показать все записи"
+lang_footer_show_email="показать e-mail"

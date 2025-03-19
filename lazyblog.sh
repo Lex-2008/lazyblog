@@ -17,11 +17,12 @@ BLOG_RIGHTS="CC BY"
 BLOG_RIGHTS_LONG="Creative Commons Attribution 4.0 International"
 BLOG_RIGHTS_URL="https://creativecommons.org/licenses/by/4.0/"
 BLOG_LANG="en"
-TRACKER_CODE="<script async='' data-info-to='/info/' data-hello-to='/hello/' src='$LAZYBLOG_URL/page.js'></script>"
+# TRACKER_CODE="<script async='' data-info-to='/info/' data-hello-to='/hello/' src='$LAZYBLOG_URL/page.js'></script>"
 PROCESSOR="cmark-gfm --unsafe -e footnotes -e table -e strikethrough -e tasklist --strikethrough-double-tilde"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
+TEMPLATE_LIST_LANG='$lang_small_published $lang_small_updated $lang_small_tags $lang_small_sep $lang_footer_sep $lang_footer_show_email $lang_footer_show_all'
 TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG $TRACKER_CODE $TRACKER_CODE_XML'
-TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $tracker_code'
+TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN $TEMPLATE_LIST_LANG"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $scripts $tracker_code'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//;s/-\\+/-/'"
 STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
@@ -31,8 +32,12 @@ s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-ali
 s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https://web.archive.org"] {font-size:x-small; vertical-align:sub}_;
 /{/!d
 '
+SCRIPTS_TO_HTML='s_live_<script>(new WebSocket((location.protocol[4]=="s"?"wss":"ws")+"://ws.shpakovsky.ru/modified.sh?"+location.host+location.pathname)).onmessage=(event)=>{if(event.data.indexOf("MODIFY")>-1) location.reload();};</script>_;
+/script/!d
+'
 
 . .config &> /dev/null
+. "$LAZYBLOG_DIR/lang-$BLOG_LANG.sh" &>/dev/null
 
 BLOG_LINKS="$(echo "$BLOG_LINKS" | tr '|' '\n' | sed -r 's_^([^ ]+) (.*)_\t<link rel="related" href="\1" title="\2"/>_')"
 BLOG_RIGHTS_HTML="<a $(test -n "$BLOG_RIGHTS_URL" && echo "href='$BLOG_RIGHTS_URL'") $(test -n "$BLOG_RIGHTS_LONG" && echo "title='$BLOG_RIGHTS_LONG'")>$BLOG_RIGHTS</a>"
@@ -99,6 +104,7 @@ process_file() {
 			eval export "$key"="\$value"
 		done
 		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
+		export scripts="$(echo "$scripts" | tr ' ' '\n' | sed "$SCRIPTS_TO_HTML")"
 		export xmltags="$(echo "$tags" | tr ' ' '\n' | sed -r 's_([^ ]+)_\L\t\t<category term="&"/>_g')"
 		export htmltags="$(echo "$tags" | sed -r 's_([^ ]+)_\L<a href="./#tag:&">&</a>_g')"
 		export texttitle="$(echo "$title" | sed -r 's/<[^>]*>//g;s/&[a-z]+;//g')"
