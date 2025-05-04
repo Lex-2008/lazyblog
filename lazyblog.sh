@@ -116,7 +116,7 @@ process_file() {
 		if [ "$CMD" != "reindex" ]; then
 			sed '/=====/,$d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST_PAGE"
 			#echo "Markdown..." >&2
-			$PROCESSOR
+			eval "$PROCESSOR"
 			sed '1,/=====/d' "$POST_TEMPLATE" | envsubst "$TEMPLATE_LIST_PAGE"
 		fi
 	} <"$src" >"$dst"
