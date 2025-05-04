@@ -76,7 +76,7 @@ rawurlencode() {
 		case "$c" in
 			( [-_.~/a-zA-Z0-9] ) o="${c}"
 				;;
-			( * ) printf -v o '%%%02x' "'$c"
+			( * ) printf -v o '%%%02X' "'$c"
 		esac
 		encoded+="${o}"
 	done
@@ -87,7 +87,7 @@ process_file() {
 	# $1 is *.md file to process
 	src="$1"
 	export name="${src%.*}"
-	export url="$(rawurlencode "$name").html"
+	export url="$(LC_ALL=C rawurlencode "$name").html"
 	export modified=$(date -r "$1" +"$DATE_FORMAT")
 	export modifiedTZ="$(rfc_date -r "$1")"
 	[ "${name:0:1}" = . ] && tracker_code='' || tracker_code="$TRACKER_CODE" # $tracker_code (lowercase) NOT on draft pages
