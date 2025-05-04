@@ -24,10 +24,12 @@ TEMPLATE_LIST_LANG='$lang_small_published $lang_small_updated $lang_small_tags $
 TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG $TRACKER_CODE $TRACKER_CODE_XML'
 TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN $TEMPLATE_LIST_LANG"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $scripts $tracker_code'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//;s/-\\+/-/'"
-STYLES_TO_CSS='s_img_img {display:block; margin:auto; max-width:100%}_;
+STYLES_TO_CSS='s_^img$_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
 s_hr_main hr {border: 1px solid #8888}_;
-s_blockquote_blockquote {border-left:solid 3px gray;margin-left:1em;padding-left:1em}_;
+s_blockquote_blockquote {border-left:solid 3px gray;margin-left:1em;padding:0.1px 1em 0.1px 1em;background: rgba(128,128,128,0.5)}_;
+s_pre_pre {border:solid 1px gray;background: rgba(128,128,128,0.5)}_;
+s_invert-\?img$_@media (prefers-color-scheme: dark) {img{filter: invert()}}_;
 s_cache_a[href^="/cache/"],a[href^="../cache/"] {font-size:x-small; vertical-align:sub}_;
 s_archive_a[href^="http://archive."],a[href^="https://archive."],a[href^="https://web.archive.org"] {font-size:x-small; vertical-align:sub}_;
 /{/!d
