@@ -16,13 +16,17 @@ BLOG_AUTHOR_URL="http://alexey.shpakovsky.ru/"
 BLOG_RIGHTS="CC BY"
 BLOG_RIGHTS_LONG="Creative Commons Attribution 4.0 International"
 BLOG_RIGHTS_URL="https://creativecommons.org/licenses/by/4.0/"
+privacy_nolog="No data about visitors of this page is collected"
+privacy_log="For security purposes the following data is collected about visitors of this page: IP address and port, country and ISP, access date and time, URL of this and previous (if available) page, and browser user-agent. This data is stored for an indefinite period. To remove your data, send me an email with your data."
+BLOG_PRIVACY="$privacy_nolog"
 BLOG_LANG="en"
+privacy_default="$BLOG_PRIVACY"
 # TRACKER_CODE="<script async='' data-info-to='/info/' data-hello-to='/hello/' src='$LAZYBLOG_URL/page.js'></script>"
 PROCESSOR="cmark-gfm --unsafe -e footnotes -e table -e strikethrough -e tasklist --strikethrough-double-tilde"
 GZIP_HTML="y" # set to "n" to disable creating compressed page.html.gz files next to each page.html
-TEMPLATE_LIST_LANG='$lang_small_published $lang_small_updated $lang_small_tags $lang_small_sep $lang_footer_sep $lang_footer_show_email $lang_footer_show_all'
-TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG $TRACKER_CODE $TRACKER_CODE_XML'
-TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN $TEMPLATE_LIST_LANG"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $scripts $tracker_code'
+TEMPLATE_LIST_LANG='$lang_small_published $lang_small_updated $lang_small_tags $lang_small_sep $lang_footer_sep $lang_footer_privacy $lang_footer_show_email $lang_footer_show_all'
+TEMPLATE_LIST_MAIN='$LAZYBLOG_URL $BLOG_TITLE $BLOG_INTRO $BLOG_URL $BLOG_LINKS $BLOG_AUTHOR $BLOG_AUTHOR_URL $BLOG_RIGHTS $BLOG_RIGHTS_HTML $BLOG_LANG $BLOG_PRIVACY $BLOG_PRIVACY_XML $TRACKER_CODE $TRACKER_CODE_XML'
+TEMPLATE_LIST_PAGE="$TEMPLATE_LIST_MAIN $TEMPLATE_LIST_LANG"' $PROCESSOR $name $url $uuid $title $texttitle $created $createdTZ $modified $modifiedTZ $tags $htmltags $xmltags $intro $textintro $htmlintro $style $styles $scripts $privacy $tracker_code'
 TITLE_TO_FILENAME="sed 's/./\\L&/g;s/\\s/-/g;s/[^a-z0-9а-яёæøå_-]//g;s/^-*//;s/-\\+/-/'"
 STYLES_TO_CSS='s_^img$_img {display:block; margin:auto; max-width:100%}_;
 s_footnotes\?_.footnotes {border-top: 1px solid #8888;font-size:smaller}_;
@@ -51,6 +55,8 @@ BLOG_LINKS="$(echo "$BLOG_LINKS" | tr '|' '\n' | sed -r 's_^([^ ]+) (.*)_\t<link
 BLOG_RIGHTS_HTML="<a $(test -n "$BLOG_RIGHTS_URL" && echo "href='$BLOG_RIGHTS_URL'") $(test -n "$BLOG_RIGHTS_LONG" && echo "title='$BLOG_RIGHTS_LONG'")>$BLOG_RIGHTS</a>"
 
 test -n "$TRACKER_CODE" && TRACKER_CODE_XML="<div id='tracker-code' xmlns='http://www.w3.org/1999/xhtml'>$TRACKER_CODE</div>"
+BLOG_PRIVACY_XML="<div id='blog-privacy' xmlns='http://www.w3.org/1999/xhtml'>$BLOG_PRIVACY</div>"
+test -z "$privacy_default" && privacy_default="$BLOG_PRIVACY"
 
 test -n "$BLOG_RIGHTS_LONG" && BLOG_RIGHTS="$BLOG_RIGHTS ($BLOG_RIGHTS_LONG)"
 test -n "$BLOG_RIGHTS_URL" && BLOG_RIGHTS="$BLOG_RIGHTS $BLOG_RIGHTS_URL"
@@ -106,6 +112,10 @@ process_file() {
 			value="${line#*=}"
 			eval export "$key"="\$value"
 		done
+		# privacy might contain a name of another env variable, which value is then used
+		varname_privacy="privacy_$privacy"
+		[ -n "${!varname_privacy}" ] && export privacy="${!varname_privacy}"
+		[ -z "$privacy" ] && export privacy="$privacy_default"
 		export styles="$(echo "$styles" | tr ' ' '\n' | sed "$STYLES_TO_CSS")"
 		export scripts="$(echo "$scripts" | tr ' ' '\n' | sed "$SCRIPTS_TO_HTML")"
 		export xmltags="$(echo "$tags" | tr ' ' '\n' | sed -r 's_([^ ]+)_\L\t\t<category term="&"/>_g')"

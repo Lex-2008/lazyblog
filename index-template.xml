@@ -14,6 +14,7 @@ $BLOG_LINKS
 	</author>
 	<rights>$BLOG_RIGHTS</rights>
 	<generator uri="https://github.com/lex-2008/lazyblog">lazyblog</generator>
+	$BLOG_PRIVACY_XML
 	$TRACKER_CODE_XML
 	<!-- put contents below -->
 	<entry> <!-- begin $name -->

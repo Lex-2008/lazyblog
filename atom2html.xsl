@@ -7,6 +7,7 @@
 	<xsl:variable name="base" select="/atom:feed/atom:link/@href"/>
 	<xsl:variable name="base_len" select="string-length($base)"/>
 	<xsl:variable name="lazyblog-url" select="/processing-instruction('lazyblog-url')"/>
+	<xsl:variable name="privacy-policy" select="/atom:feed/*[@id='privacy-policy']"/>
 	<xsl:variable name="tracker-code" select="/atom:feed/*[@id='tracker-code']"/>
 	<xsl:variable name="lang" select="document(concat($lazyblog-url, '/lang-', /atom:feed/@xml:lang, '.xml'))/*"/>
 	<!-- see: https://en.wikipedia.org/wiki/XSLT/Muenchian_grouping -->
@@ -137,6 +138,12 @@
 						<a href="{atom:author/atom:uri}">
 							<xsl:value-of select="atom:author/atom:name"/>
 						</a>
+						<xsl:if test="$privacy-policy">
+							<xsl:value-of select="$lang/footer/sep"/>
+							<a href="javascript:alert('{$privacy-policy}')">
+								<xsl:value-of select="$lang/footer/privacy-policy"/>
+							</a>
+						</xsl:if>
 						<xsl:value-of select="$lang/footer/sep"/>
 						<a id="email" href="javascript:(l=document.getElementById('email')).href='mailto:'+(l.innerHTML=location.hostname.replace('.','@'));void 0">
 							<xsl:value-of select="$lang/footer/show-email"/>
